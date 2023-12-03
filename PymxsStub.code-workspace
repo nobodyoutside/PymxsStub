@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"[python]": {
+			"diffEditor.ignoreTrimWhitespace": false,
+			"editor.defaultFormatter": "ms-python.black-formatter",
+			"editor.formatOnType": true,
+			"editor.wordBasedSuggestions": false
+		}
+	}
+}
