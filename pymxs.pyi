@@ -1,3 +1,4 @@
+# flake8: noqa: E701
 """
  수작업으로 필요할때 추가하는 스텁파일
  - 독스티링 적용(독스트링은 상속이 안되기 때문에 여기서 적어야함)
@@ -6,15 +7,11 @@
 
 import MXSWrapperBase as mxs
 
-
 class runtime:
     currentTime: int
 
-    class windows:
-        ...
-
-    class Name(mxs.Name):
-        ...
+    class windows: ...
+    class Name(mxs.Name): ...
 
     class Node(mxs.Node):
         """
@@ -43,10 +40,8 @@ class runtime:
         """
 
         ...
-
     @staticmethod
     def redrawViews(): ...
-
     @staticmethod
     def inverse(matrix3: "Matrix3"): ...
     @staticmethod
