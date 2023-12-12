@@ -1,7 +1,8 @@
+# flake8: noqa: E302
 """
 runtime에 적용할 베이스 클래스 정보 입력
 """
-from typing import Type, Union
+from typing import Type, Union, Optional
 
 class MXSWrapperBase:
     @staticmethod
@@ -43,13 +44,74 @@ class VertexSelection(MXSWrapper):
 
     ...
 
+class Controller(MXSWrapper): ...
 class TCB_Rotation(MXSWrapper): ...
 class meshOp(MXSWrapper): ...
+class Color(Point3): ...
+class Box3(MXSWrapper): ...
+class Material(MXSWrapper): ...
+class TriMesh(MXSWrapper): ...
 
 class Node(MXSWrapper):
-    baseObject: MXSWrapper
     transform: Matrix3
-    controller: any
+    name: str
+    baseObject: Type["Node"]
+    parent: Type["Node"]
+    material: Type[Material]
+    children: list
+    mesh: Type["TriMesh"]
+    boundingBox: Type[Box3]
+    displayByLayer: bool
+    motionByLayer: bool
+    renderByLayer: bool
+    colorByLayer: bool
+    globalIlluminationByLayer: bool
+    isTarget: bool
+    lookAt: Type["Node"]
+    target: Type["Node"]
+    targetDistance: float
+    isHidden: bool
+    isNodeHidden: bool
+    isHiddenInVpt: bool
+    isFrozen: bool
+    isNodeFrozen: bool
+    isSelected: bool
+    xray: bool
+    boxMode: bool
+    allEdges: bool
+    vertexTicks: bool
+    """ 노드의 모든 정점을 뷰포트에 눈금으로 표시할지 여부를 가져오거나 설정합니다. """
+    backFaceCull: bool
+    showTrajectory: bool
+    ignoreExtents: bool
+    showFrozenInGray: bool
+    wireColor: Type[Color]
+    """  """
+    showLinks: bool
+    showLinksOnly: bool
+    showVertexColors: bool
+    vertexColorType: Type[Name]
+    vertexColorsShaded: bool
+    isDependent: bool
+    visibility: bool
+    controller: Type[Controller]
+    renderable: bool
+    inheritVisibility: bool
+    primaryVisibility: bool
+    secondaryVisibility: bool
+    receiveShadows: bool
+    castShadows: bool
+    applyAtmospherics: bool
+    renderOccluded: bool
+    gbufferChannels: bool
+    imageMotionBlurMultiplier: float
+    motionBlurOn: bool
+    motionBlurOnController: Type[Controller]
+    motionBlur: Type[Name]
+    generatecaustics: bool
+    rcvcaustics: bool
+    generateGlobalIllume: bool
+    rcvGlobalIllum: bool
     ...
 
 class CirCle(Node): ...
@@ -69,10 +131,8 @@ class Biped(Node):
             result: Quat
         return result
         ...
-
     @staticmethod
-    def addNewKey(ctrl, time, type):
-        ...
+    def addNewKey(ctrl, time, type): ...
 
 class LayerProperties(MXSWrapper): ...
 
