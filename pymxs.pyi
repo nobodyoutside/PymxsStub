@@ -66,6 +66,17 @@ class runtime:
         def getLayerFromName(*args, **kwargs) -> runtime.Layer: ...
         ...
 
+    class NodeGeneric(Value): ...
+    class Generic(Value): ...
+
+    class getnumtverts(Generic):
+        """-> int"""
+
+        def __new__(cls, node) -> int: ...
+
+    class convertToMesh(NodeGeneric):
+        def __new__(cls, node) -> None: ...
+
     class Skin(mxs.Skin): ...
 
     class meshop(StructDef):
@@ -91,7 +102,7 @@ class runtime:
 
         @staticmethod
         def setNumMapVerts(*args, **kwargs) -> runtime.BitArray:
-            """meshop.setNumMapVerts <Mesh mesh> <Integer mapChannel> <Integer count> keep:<boolean=FALSE>"""
+            """setNumMapVerts <Mesh mesh> <Integer mapChannel> <Integer count> keep:<boolean=FALSE>"""
             ...
 
         @staticmethod
