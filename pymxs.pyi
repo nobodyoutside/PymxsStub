@@ -70,6 +70,16 @@ class runtime:
 
     class meshop(StructDef):
         @staticmethod
+        def getMapSupport(*args, **kwargs) -> bool:
+            """getMapSupport <Mesh mesh> <Integer mapChannel>"""
+            ...
+
+        @staticmethod
+        def setMapSupport(*args, **kwargs) -> bool:
+            """setMapSupport <Mesh mesh> <Integer mapChannel> <Boolean support>"""
+            ...
+
+        @staticmethod
         def setNumMaps(*args, **kwargs) -> runtime.BitArray:
             """meshop.setNumMaps <Mesh mesh> <int count> keep:<bool1ean=false>"""
             ...
