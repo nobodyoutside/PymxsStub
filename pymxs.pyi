@@ -91,17 +91,18 @@ class runtime:
             ...
 
         @staticmethod
-        def setNumMaps(*args, **kwargs) -> runtime.BitArray:
+        def setNumMaps(*args, **kwargs) -> None:
             """meshop.setNumMaps <Mesh mesh> <int count> keep:<bool1ean=false>"""
             ...
 
         @staticmethod
-        def getNumMaps(Any) -> runtime.BitArray:
-            """meshop.setNumMaps <Mesh mesh> <int count> keep:<bool1ean=false>"""
+        def getNumMaps(Any) -> int:
+            """-> int(카운트를 반환)
+            setNumMaps <Mesh mesh> <int count> keep:<bool1ean=false>"""
             ...
 
         @staticmethod
-        def setNumMapVerts(*args, **kwargs) -> runtime.BitArray:
+        def setNumMapVerts(*args, **kwargs) -> None:
             """setNumMapVerts <Mesh mesh> <Integer mapChannel> <Integer count> keep:<boolean=FALSE>"""
             ...
 
@@ -111,7 +112,7 @@ class runtime:
             ...
 
         @staticmethod
-        def getFaceCenter(*args, **kwargs) -> runtime.BitArray:
+        def getFaceCenter(*args, **kwargs) -> runtime.Point3:
             """<point3>meshop.getFaceCenter <Mesh mesh> <int faceIndex> node:<node=unsupplied>"""
             ...
 
