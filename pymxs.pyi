@@ -34,9 +34,12 @@ class runtime:
         alpha: Type[mxs.Name]
         color_plus_illum: Type[mxs.Name]
         ...
-
+    class setFaceSelection(NodeGeneric):
+        def __new__(cls, *args, **kwargs) -> None: ...
+    class getFaceSelection(NodeGeneric):
+        def __new__(cls, *args, **kwargs) -> runtime.BitArray: ...
     class MAXWrapper(Value): ...
-
+    class FaceSelection(Value): ...
     class node(MAXWrapper):
         """[Node : MAXWrapper](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-1C9953AA-4750-4147-91DC-127AF2F7BC87)
         [Interface : INode](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-0BFEF796-5952-48B0-8929-88475F927649)
@@ -47,6 +50,7 @@ class runtime:
 
     class GeometryClass(node):
         mesh: runtime.TriMesh
+        numfaces: int
         ...
 
     class Sphere(runtime.GeometryClass):
@@ -95,6 +99,11 @@ class runtime:
     class Skin(mxs.Skin): ...
 
     class meshop(StructDef):
+        @staticmethod
+        def getNumMapFaces(*args, **kwargs) -> int:
+            """getNumMapFaces <Mesh mesh> <Integer mapChannel>
+            -> integer"""
+            ...
         @staticmethod
         def getMapSupport(*args, **kwargs) -> bool:
             """getMapSupport <Mesh mesh> <Integer mapChannel>"""
@@ -295,7 +304,6 @@ class runtime:
         getEdgesUsingVert:<fn>; Public,
         getOpenEdges:<fn>; Public)
         """
-
         @staticmethod
         def getFaceCenter(*args, **kwargs) -> runtime.Point3:
             """<point3>polyop.getFaceCenter <Mesh mesh> <int faceIndex> node:<node=unsupplied>"""
@@ -310,6 +318,7 @@ class runtime:
         def setFaceSelection(*args, **kwargs) -> None: ...
         @staticmethod
         def getFacesUsingMapFace(*args, **kwargs) -> runtime.BitArray: ...
+
 
     class BoneSys(mxs.BoneSys): ...
     class controller: ...
@@ -328,7 +337,10 @@ class runtime:
 
     class Unwrap_UVW(modifier):
         """https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-17D700DC-1FDC-4713-8041-D9E3C3EB4789"""
-
+        class unwrap:
+            def __init__(self) -> None: ...
+            @classmethod
+            def setMapChannel(cls, index: int) -> None: ...
         def __init__(self) -> None: ...
         def setFaceVertex(
             self,
@@ -370,6 +382,12 @@ class runtime:
             - ithVertex: faceIndex에서 몇 번째 정점을 찾을지 지정
             - 면에서 **메쉬**의 정점의 인덱스를 검색
 
+            """
+            ...
+        def flattenMap(self, angleThreshold, normalList, spacing, normalize, layOutType, rotateClusters, fillHoles) -> None:
+            """flattenMap <float>angleThreshold <point3 array>normalList <float>spacing <boolean>normalize <integer>layOutType <boolean>rotateClusters <boolean>fillHoles
+            - 매핑 평탄화 대화상자를 사용하지 않고 제공된 파라미터에 따라 UVW 좌표를 평탄화합니다.
+            - 이 메서드는 동일한 기능을 MAXScript에 직접 노출하며 UVW 플로터 편집을 열지 않아도 됩니다.
             """
             ...
 
