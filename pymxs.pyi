@@ -63,7 +63,13 @@ class runtime:
 
     class Box3: ...
     class Material: ...
-
+    class SetCommandPanelTaskMode(Value):
+        def __new__(cls, name: runtime.Name) -> None:
+            """ name
+            - modify
+            """
+            ...
+        ...
     class Point3(mxs.Point3):
         """[<expr>, <expr>, <expr>]
 
@@ -139,7 +145,8 @@ class runtime:
         def getFaceCenter(*args, **kwargs) -> runtime.Point3:
             """<point3>meshop.getFaceCenter <Mesh mesh> <int faceIndex> node:<node=unsupplied>"""
             ...
-
+    class getNumFaces(Generic):
+        def __new__(cls, node) -> int: ...
     class polyop(StructDef):
         """
         getNumVDataChannels:<fn>; Public,
@@ -341,6 +348,9 @@ class runtime:
             def __init__(self) -> None: ...
             @classmethod
             def setMapChannel(cls, index: int) -> None: ...
+        class unwrap2:
+            @staticmethod
+            def flattenMapNoParams() -> None: ...
         def __init__(self) -> None: ...
         def setFaceVertex(
             self,
