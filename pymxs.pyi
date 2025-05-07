@@ -6,7 +6,7 @@
 """
 from __future__ import annotations
 import enum
-from typing import Type, Any
+from typing import Type, Any, overload, Literal
 
 import MXSWrapperBase as mxs
 
@@ -907,7 +907,16 @@ class runtime:
         row3: runtime.Point3
         row4: runtime.Point3
         translation: runtime.Point3
-        def __init__(*args, **kwargs) -> None: ...
+        @overload
+        def __init__(self, flag: Literal[0, 1]) -> None: ...
+
+        @overload
+        def __init__(self,
+                     row1:runtime.Point3,
+                     row2:runtime.Point3,
+                     row3:runtime.Point3,
+                     row4:runtime.Point3,
+                     ) -> None: ...
         ...
         def __mul__(self, other: runtime.Matrix3) -> runtime.Matrix3: ...
         def __rmul__(self, other: runtime.Matrix3) -> runtime.Matrix3: ...
