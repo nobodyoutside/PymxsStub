@@ -91,7 +91,7 @@ class Node(MXSWrapper):
     showTrajectory: bool
     ignoreExtents: bool
     showFrozenInGray: bool
-    wireColor: Type[Color]
+    wireColor: Color
     """  """
     showLinks: bool
     showLinksOnly: bool
