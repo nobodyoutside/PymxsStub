@@ -66,7 +66,7 @@ class Node(MXSWrapper):
     transform: Matrix3
     name: str
     baseObject: Node
-    parent: Node
+    parent: Node|None
     material: Type[Material]
     children: list
     mesh: Type["TriMesh"]

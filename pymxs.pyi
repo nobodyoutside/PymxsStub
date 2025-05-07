@@ -5,6 +5,7 @@
     - 클래스 메소드 설명은 잘 따라옴.
 """
 from __future__ import annotations
+import enum
 from typing import Type, Any
 
 import MXSWrapperBase as mxs
@@ -113,8 +114,54 @@ class runtime:
     def clearListener() -> None: ...
 
 
+    class Object(Value):...
+    class MAXObject(Value):...
+    class Time(Value, int, float):
+        def __init__(self, *args, **kwargs) -> None: ...
     class Matrix3Controller(MAXWrapper): ...
-    class transform_script(Matrix3Controller): ...
+    class transform_script(Matrix3Controller):
+        class Type(enum.Enum)
+            unknown = runtime.Name("unknown")
+            target = runtime.Name("target")
+            constant = runtime.Name("constant")
+            object = runtime.Name("object")
+            node = runtime.Name("node")
+        ThrowOnError: bool
+        def __init__(self, *args, **kwargs) -> None: ...
+        def AddConstant(self, *args, **kwargs) -> bool: ...
+        def SetConstant(self, which: str|int, *args, **kwargs) -> bool: ...
+        def GetConstant(self, which: str|int, *args, **kwargs) -> Any: ...
+        def AddTarget(
+                self,
+                value_name:str,
+                target: runtime.node,
+                Offset:int|float = runtime.Time(0),
+                Owner:Any=None) -> bool: ...
+        def SetTarget(self, which: str|int, target:runtime.Value, Owner:runtime.Value|None=None) -> bool: ...
+        def GetTarget(self, which: str|int, asObject:bool=False) -> runtime.Value: ...
+        # ObjectVariable
+        def AddObject(self, *args, **kwargs) -> bool: ...
+        def SetObject(self, which: str|int, object:runtime.Object) -> bool: ...
+        def GetObject(self, which: str|int) -> runtime.MAXObject: ...
+        def AddNode(self, name:str, node: runtime.node) -> bool: ...
+        def SetNode(self, which: str|int, node: runtime.node) -> bool: ...
+        def GetNode(self, which: str|int) -> runtime.node: ...
+        def DeleteVariable(self, which: str|int) -> bool: ...
+        # General Variable Access
+        def NumVariables(self) -> int: ...
+        def VariableExists(self, *args, **kwargs) -> bool: ...
+        def GetType(self, *args, **kwargs) -> runtime.transform_script.Type: ...
+        def GetName(self, *args, **kwargs) -> str: ...
+        def RenameVariable(self, *args, **kwargs) -> bool: ...
+        def GetIndex(self, name:str) -> int: ...
+        def GetValue(self, *args, asObject:bool=False, **kwargs) -> runtime.Value: ...
+        def GetVarValue(self, *args, **kwargs) -> runtime.Value: ...
+        # Variable Time Offset
+        def SetOffset(self, which: str|int, offset:runtime.Time, *args, **kwargs) -> bool: ...
+        def GetOffset(self, which: str|int, *args, **kwargs) -> runtime.Time: ...
+        ...
+        def SetExpression(self, expression:str) -> bool: ...
+
     class Vertical_Horizontal_Turn(MAXWrapper): ...
     class Dummy(GeometryClass): ...
     class Point(GeometryClass): ...
@@ -146,8 +193,9 @@ class runtime:
 
     class helper(node): ...
 
-    class Bone(helper): ...
-
+    class Bone(helper):
+        def __init__(self, *args, **kwargs) -> None:...
+        
     class vertexColorType(mxs.Name):
         color: Type[mxs.Name]
         illum: Type[mxs.Name]
@@ -166,9 +214,73 @@ class runtime:
         """
 
         name: str
+        transform: runtime.Matrix3
+        name: str
+        baseObject: runtime.node
+        parent: runtime.node|None
+        material: runtime.Material
         children: runtime.Array
+        mesh: runtime.TriMesh
+        boundingBox: runtime.Box3
+        displayByLayer: bool
+        motionByLayer: bool
+        renderByLayer: bool
+        colorByLayer: bool
+        globalIlluminationByLayer: bool
+        isTarget: bool
+        lookAt: runtime.node|None
+        target: runtime.node|None
+        targetDistance: float
+        isHidden: bool
+        isNodeHidden: bool
+        isHiddenInVpt: bool
+        isFrozen: bool
+        isNodeFrozen: bool
+        isSelected: bool
+        xray: bool
+        boxMode: bool
+        allEdges: bool
+        vertexTicks: bool
+        """ 노드의 모든 정점을 뷰포트에 눈금으로 표시할지 여부를 가져오거나 설정합니다. """
+        backFaceCull: bool
+        showTrajectory: bool
+        ignoreExtents: bool
+        showFrozenInGray: bool
+        wireColor: runtime.Color
+        """  """
+        showLinks: bool
+        showLinksOnly: bool
+        showVertexColors: bool
+        vertexColorType: runtime.Name
+        vertexColorsShaded: bool
+        isDependent: bool
+        visibility: bool
+        controller: runtime.Matrix3Controller
+        renderable: bool
+        inheritVisibility: bool
+        primaryVisibility: bool
+        secondaryVisibility: bool
+        receiveShadows: bool
+        castShadows: bool
+        applyAtmospherics: bool
+        renderOccluded: bool
+        gbufferChannels: bool
+        imageMotionBlurMultiplier: float
+        motionBlurOn: bool
+        motionBlurOnController: runtime.floatController
+        motionBlur: runtime.Name
+        ''' default: #none
+        - #none
+        - #object
+        - #image
+        '''
+        generatecaustics: bool
+        rcvcaustics: bool
+        generateGlobalIllume: bool
+        rcvGlobalIllum: bool
         ...
 
+    class floatController(MAXWrapper):...
     class GeometryClass(node):
         name: str
         transform: runtime.Matrix3
@@ -781,13 +893,24 @@ class runtime:
 
     class BoneSys(mxs.BoneSys): ...
     class controller: ...
+    class Quat: ...
 
-    class Matrix3(mxs.Matrix3):
+    class Matrix3(Value):
         """
         [2022 api link](https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-D77C780A-4E8A-4528-949F-CC09AAE048DA)
         """
+        rotation: runtime.Quat
+        """ 회전값 """
+        position: runtime.Point3
+        row1: runtime.Point3
+        row2: runtime.Point3
+        row3: runtime.Point3
+        row4: runtime.Point3
+        translation: runtime.Point3
         def __init__(*args, **kwargs) -> None: ...
         ...
+        def __mul__(self, other: runtime.Matrix3) -> runtime.Matrix3: ...
+        def __rmul__(self, other: runtime.Matrix3) -> runtime.Matrix3: ...
 
     class modifier(MAXWrapper):
         """ """
@@ -879,7 +1002,7 @@ class runtime:
     @staticmethod
     def redrawViews(): ...
     @staticmethod
-    def inverse(matrix3: "Matrix3"): ...
+    def inverse(matrix3: Matrix3) -> Matrix3: ...
     @staticmethod
     def AttachObjects(
         pNode: Type[mxs.Node], node: Type[mxs.Node], move=True
