@@ -2,9 +2,11 @@
 """
 runtime에 적용할 베이스 클래스 정보 입력
 """
+from __future__ import annotations
 from typing import Type, Union, Optional
 
 class Value: ...
+
 
 class MXSWrapperBase:
     @staticmethod
@@ -12,11 +14,13 @@ class MXSWrapperBase:
     @staticmethod
     def setmxsprop(key: str, value): ...
 
-class MXSWrapper(Value): ...
+
+class MXSWrapper(Value):
     @staticmethod
     def getmxsprop(key: str): ...
     @staticmethod
     def setmxsprop(key: str, value): ...
+
 
 class Name:
     def __init__(self, string: str):
@@ -61,8 +65,8 @@ class TriMesh(MXSWrapper): ...
 class Node(MXSWrapper):
     transform: Matrix3
     name: str
-    baseObject: Type["Node"]
-    parent: Type["Node"]
+    baseObject: Node
+    parent: Node
     material: Type[Material]
     children: list
     mesh: Type["TriMesh"]
@@ -73,8 +77,8 @@ class Node(MXSWrapper):
     colorByLayer: bool
     globalIlluminationByLayer: bool
     isTarget: bool
-    lookAt: Type["Node"]
-    target: Type["Node"]
+    lookAt: Node
+    target: Node
     targetDistance: float
     isHidden: bool
     isNodeHidden: bool
