@@ -39,6 +39,24 @@ class runtime:
         ''' 오브젝트 유효성 검사'''
         ...
     @staticmethod
+    def rotateYPRMatrix(yaw: int|float, pitch: int|float, roll: int|float) -> runtime.Matrix3:
+        '''
+        parems:
+        - yaw: int|float - y축
+        - pitch: int|float - x축
+        - roll: int|float - z축
+        '''
+        ...
+    @staticmethod
+    def preRotateX(matrix3: runtime.Matrix3, number: int|float) -> runtime.Matrix3: ...
+    ''' maxtrix3는 참조값으로 업데이트됨, number는 회전값 '''
+    @staticmethod
+    def preRotateY(matrix3: runtime.Matrix3, number: int|float) -> runtime.Matrix3: ...
+    ''' maxtrix3는 참조값으로 업데이트됨, number는 회전값 '''
+    @staticmethod
+    def preRotateZ(matrix3: runtime.Matrix3, number: int|float) -> runtime.Matrix3: ...
+    ''' maxtrix3는 참조값으로 업데이트됨, number는 회전값 '''
+    @staticmethod
     def delete(*args, **kwargs) -> Any: ...
     @staticmethod
     def isKindOf(*args, **kwargs) -> bool: ...
