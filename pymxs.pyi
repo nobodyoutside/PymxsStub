@@ -35,6 +35,33 @@ class runtime:
     class interface(Value):
         ...
 
+    class skinUtils(interface):
+        @staticmethod
+        def ExtractSkinData(node) -> None: ...
+
+        @staticmethod
+        def ImportSkinData(target_node, source_node) -> None: ...
+
+        @staticmethod
+        def ImportSkinDataNoDialog(
+            matchByName: bool,
+            removeTargetPrefix: bool,
+            removeTargetSuffix: bool,
+            removeSourcePrefix: bool,
+            removeSourceSuffix: bool,
+            threshold: float,
+            interpolationType: int
+        ) -> None:
+            '''
+            - matchByName 매개 변수가 true로 설정되면 뼈가 이름으로 일치합니다(대화 상자의 Match By Name 버튼을 누르는 것과 동일). 거짓이면 뼈는 인덱스로 일치합니다.
+            - 논쟁 2 ~ 5 개는 대화 상자의 수정 및 접미사 제거 체크 박스의 상태에 해당합니다.
+            - threshold: 임계값 인수는 대화 상자의 임계값에 해당합니다.The threshold argument corresponds to the Threshold value in the dialog. 이것은 가장 가까운 이웃 임계 값입니다.
+            - interpolationType: 마지막 인수는 `Interpolation Type` 드롭다운 목록의 선택에 해당합니다. 가능한 값은 다음과 같습니다.
+                - 0 - Vertex에 의하여 일치
+                -  1 - 얼굴별 경기
+            '''
+            ...
+
     class maxOps(interface):
         @staticmethod
         def getNodeByHandle(handle: int) -> runtime.node | None: ...
@@ -87,32 +114,43 @@ class runtime:
         - <https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-0820AA26-920F-434D-A6BC-E8B6B57F54AC>  # noqa: E501
         '''
         @staticmethod
-        def GetBoneNode(skin, bone_index) -> runtime.GeometryClass: ...
+        def GetBoneNode(skin, bone_index:int) -> runtime.GeometryClass: ...
         @staticmethod
-        def GetNumberBones(*args, **kwargs) -> int: ...
+        def GetNumberBones(skin) -> int: ...
         @staticmethod
-        def GetBoneIDByListID(*args, **kwargs) -> int: ...
+        def GetListIDByBoneID(skin, bone_id: int) -> int: ...
         @staticmethod
-        def GetBoneNodes(*args, **kwargs) -> list: ...
+        def GetBoneIDByListID(skin, list_id: int) -> int: ...
+        @staticmethod
+        def GetBoneNodes(skin) -> list: ...
+        @staticmethod
+        def GetBoneName(skin, bone_index: int, nameflag: Literal[0,1]) -> str:
+            '''
+            Args:
+                - nameflag: Literal[0,1]
+                    - 0: bone name
+                    - 1: UI list name
+            '''
+            ...
 
         @overload
         @staticmethod
         def ReplaceVertexWeights(
-            Skin,
-            vertex_integer,
+            Skin: Any,
+            vertex_integer: int,
             vertex_bone_integer: int,
             weight_float: float,
-            node: runtime.node, name: str): ...
+            node: runtime.node|None=None, name: str=""): ...
 
         @overload
         @staticmethod
         def ReplaceVertexWeights(
-            Skin,
-            vertex_integer,
-            vertex_bone_array: Array,
-            weight_array: Array,
-            node: runtime.node,
-            name: str): ...
+            Skin: Any,
+            vertex_integer: int,
+            vertex_bone_array: runtime.Array|list,
+            weight_array: runtime.Array|list,
+            node: runtime.node|None=None,
+            name: str=""): ...
 
         @staticmethod
         def GetVertexWeight(
@@ -361,7 +399,21 @@ class runtime:
     class helper(node): ...
 
     class Bone(helper):
-        def __init__(self, *args, **kwargs) -> None:...
+        length: int
+        fronfin: bool
+        frontfinsize: int
+        sidefins: bool
+        sidefinssize: int
+        boneEnable: bool
+        boneFreeaeLength: bool
+        boneAutoAlign: bool
+        boneScaleType: runtime.Name
+        def __init__(self, *args, **kwargs) -> None:
+            '''
+            Args:
+                - boneScaleType: runtime.Name('none')
+            '''
+            ...
         
     class vertexColorType(mxs.Name):
         color: Type[mxs.Name]
@@ -471,7 +523,6 @@ class runtime:
         ...
 
     class floatController(MAXWrapper):...
-    class Editable_mesh(GeometryClass):...
     class Editable_mesh(GeometryClass):...
     class Editable_Poly(GeometryClass):...
     class PolyMeshObject(GeometryClass):...
@@ -1090,7 +1141,11 @@ class runtime:
         def getFacesUsingMapFace(*args, **kwargs) -> runtime.BitArray: ...
 
 
-    class BoneSys(mxs.BoneSys): ...
+    class BoneSys(runtime.Interface):
+        @staticmethod
+        def createBone(startPos:runtime.Point3,
+                       endPos: runtime.Point3,
+                       zAxis: runtime.Point3) -> runtime.Bone: ...
     class controller: ...
     class Quat: ...
 
@@ -1218,7 +1273,7 @@ class runtime:
     @staticmethod
     def rotateZ(*args, **kwargs) -> Matrix3: ...
     @staticmethod
-    def snapshot(Node) -> runtime.GeometryClass: ...
+    def snapshot(Node: runtime.GeometryClass) -> runtime.Editable_mesh: ...
     @staticmethod
     def redrawViews(): ...
     @staticmethod
