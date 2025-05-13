@@ -7,8 +7,8 @@
 from __future__ import annotations
 import enum
 from typing import Type, Any, overload, Literal
-
 import MXSWrapperBase as mxs
+
 
 class runtime:
     objects: list
@@ -22,17 +22,81 @@ class runtime:
     class Value: ...
     class Array(Value, list): ...
 
+    class MixinInterface(Value):...
     class BitArray(Value):
         def __iter__(self) -> runtime.BitArray: ...
         def __next__(self) -> int: ...
 
     class OkClass(Value): ...
     class StructDef(Value): ...
+    class modPanel(StructDef):
+        @staticmethod
+        def addModToSelection(*args, **kwargs): ...
+        @staticmethod
+        def isPinStackEnabled(*args, **kwargs): ...
+        @staticmethod
+        def setPinStack(*args, **kwargs): ...
+        @staticmethod
+        def getPinStack(*args, **kwargs): ...
+        @staticmethod
+        def validModifier(*args, **kwargs) -> bool: ...
+        @staticmethod
+        def setCurrentObject(modifier: runtime.modifier) -> bool: ...
+        @staticmethod
+        def getCurrentObject() -> runtime.modifier: ...
+        @staticmethod
+        def getModifierIndex(obj: runtime.node, modifier: runtime.modifier) -> int:
+            '''
+            최상단 상단 스택이 1로 부터 시작하는 위치숫자
+            - 위치숫자1 == obj.modifiers[0] 
+            '''
+            ...
+    class refs(StructDef):
+        @staticmethod
+        def dependentNodes(*args, **kwargs) -> list: ...
+    class skinOps(StructDef):
+        '''
+        - https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-0820AA26-920F-434D-A6BC-E8B6B57F54AC
+        '''
+        @staticmethod
+        def GetBoneNode(*args, **kwargs) -> runtime.GeometryClass: ...
+        @staticmethod
+        def GetNumberBones(*args, **kwargs) -> int: ...
+        @staticmethod
+        def GetBoneIDByListID(*args, **kwargs) -> int: ...
+        @staticmethod
+        def GetBoneNodes(*args, **kwargs) -> list: ...
+        @staticmethod
+        def ReplaceVertexWeights(*args, **kwargs): ...
+        @staticmethod
+        def GetVertexWeight(*args, **kwargs): ...
+        @staticmethod
+        def GetVertexWeightBoneID(*args, **kwargs): ...
+        @staticmethod
+        def GetVertexWeightCount(skin: runtime.modifier, vert_number: int)-> int: ...
+        @staticmethod
+        def AddBone(*args, **kwargs): ...
+        @staticmethod
+        def RemoveBone(*args, **kwargs):
+            '''
+            - `skinOps.removebone <Skin>`
+            - `skinOps.removebone <Skin> <BoneID_integer> [(node:<node> | name:<string>)]`
+            '''
+            ...
     class windows:
         @staticmethod
         def getMAXHWND() -> int: ...
-    class Name(mxs.Name): ...
-    class Primitive(runtime.Value): ...
+    class Name(runtime.Value):
+        def __init__(self, string):
+            ...
+    class Primitive(runtime.Value):
+        '''
+        매소드임
+        - https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=Max_Developer_Help_cpp_ref_class_primitive_html
+        - https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-B28D7100-1F5F-4A0F-BFA3-17ABADD13580
+            - Primitives클래스에 국한되지 않는 메서드입니다. 이 메서드는 인수의 타입(있는 경우)을 확인하고, 타입이 올바르지 않으면 오류를 발생시킵니다. Primitive의 정의는 하나뿐입니다.
+        '''
+        ...
     class Interface(runtime.Value): ...
     class menuMan(Interface):
         @staticmethod
@@ -50,6 +114,10 @@ class runtime:
         @staticmethod
         def new(*args, **kwargs) -> None: ...
 
+    @staticmethod
+    def append(*args):
+        ''' '''
+        ...
     @staticmethod
     def completeRedraw() -> bool:
         ''' 화면 강재 갱신(씬 번경 업데이트시)'''
@@ -107,7 +175,7 @@ class runtime:
     @staticmethod
     def getCurrentSelection() -> Array: ...
     @staticmethod
-    def isValidNode(obj: runtime.node) -> bool: ...
+    def isValidNode(obj: runtime.Value) -> bool: ...
     @staticmethod
     def GetNamedSelSetName(i: int) -> str:
         """ n번째 명명된 선택 세트의 이름을 반환합니다. """
@@ -244,9 +312,21 @@ class runtime:
         def __new__(cls, *args, **kwargs) -> None: ...
     class getFaceSelection(NodeGeneric):
         def __new__(cls, *args, **kwargs) -> runtime.BitArray: ...
-    class MAXWrapper(Value): ...
+    class MAXWrapper(runtime.Value):
+        '''
+        https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-025B6C97-8601-4FEF-ACB8-E47EE0929300
+        '''
+        name: str
+        baseObject: runtime.Object
+        '''
+        - [`<node>`.baseObject  A subclass of Node  default: varies](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-00AB0CFA-3190-4A28-A185-4774B684F6D8)
+        - The baseObject속성은 수정자 스택의 기본 개체에 대한 액세스를 제공합니다. 왜냐하면 classOf()장면 노드 객체의 함수는 세계 상태 객체(스택의 상단)의 클래스를 반환합니다. baseObject노드를 만드는 데 사용되는 원래 개체의 클래스를 결정하는 속성. 
+        '''
+        material: runtime.Material|None
+        parent: runtime.node|None
+        ...
     class FaceSelection(Value): ...
-    class node(mxs.Node):
+    class node(runtime.MAXWrapper):
         """[Node : MAXWrapper](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-1C9953AA-4750-4147-91DC-127AF2F7BC87)
         [Interface : INode](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-0BFEF796-5952-48B0-8929-88475F927649)
         """
@@ -319,6 +399,10 @@ class runtime:
         ...
 
     class floatController(MAXWrapper):...
+    class Editable_mesh(GeometryClass):...
+    class Editable_mesh(GeometryClass):...
+    class Editable_Poly(GeometryClass):...
+    class PolyMeshObject(GeometryClass):...
     class GeometryClass(node):
         name: str
         transform: runtime.Matrix3
@@ -326,7 +410,7 @@ class runtime:
         numfaces: int
         wireColor: runtime.Color
         parent: runtime.node
-        modifiers: dict[runtime.Name|int, runtime.modifier]
+        modifiers: dict[runtime.Name|int, runtime.modifier]|list[runtime.modifier]
         ...
         
     class biped(runtime.StructDef):
@@ -705,9 +789,13 @@ class runtime:
     class convertToMesh(NodeGeneric):
         def __new__(cls, node) -> None: ...
 
-    class Skin(mxs.Skin): ...
+    class Skin(runtime.modifier): ...
 
     class meshop(StructDef):
+        @staticmethod
+        def getNumVerts(*args, **kwargs) -> int:
+            """ 버텍스"""
+            ...
         @staticmethod
         def getNumMapFaces(*args, **kwargs) -> int:
             """getNumMapFaces <Mesh mesh> <Integer mapChannel>
@@ -962,9 +1050,21 @@ class runtime:
 
     class modifier(MAXWrapper):
         """ """
+        name: str
+        """ 모디파이어 이름 """
 
         ...
 
+    class Skin_Wrap(modifier):
+        class meshDeformOps():
+            @staticmethod
+            def ConvertToSkin(*args, **kwargs) -> None: ...
+        engine: int
+        falloff: float
+        weightAllVerts: bool
+        blend: bool
+        meshList: runtime.Array
+        ...
     class Unwrap_UVW(modifier):
         """https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-17D700DC-1FDC-4713-8041-D9E3C3EB4789"""
         class unwrap:
@@ -1046,19 +1146,19 @@ class runtime:
     @staticmethod
     def rotateZ(*args, **kwargs) -> Matrix3: ...
     @staticmethod
-    def snapshot(Node) -> mxs.Node: ...
+    def snapshot(Node) -> runtime.GeometryClass: ...
     @staticmethod
     def redrawViews(): ...
     @staticmethod
     def inverse(matrix3: Matrix3) -> Matrix3: ...
     @staticmethod
     def AttachObjects(
-        pNode: Type[mxs.Node], node: Type[mxs.Node], move=True
+        pNode: runtime.node, node: runtime.node, move=True
     ): ...
     @staticmethod
     def classOf(obj: Value): ...
     @staticmethod
-    def setSelectionLevel(obj: Node, level: Name):
+    def setSelectionLevel(obj: runtime.node, level: Name):
         """
         parm:
             level: vertex
