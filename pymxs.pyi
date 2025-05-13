@@ -19,16 +19,39 @@ class runtime:
     maxfilename: str
     maxFileName: str
 
-    class Value: ...
-    class Array(Value, list): ...
+    class Value:
+        ...
 
-    class MixinInterface(Value):...
+    class Array(Value, list):
+        ...
+
+    class MixinInterface(Value):
+        ...
+
     class BitArray(Value):
         def __iter__(self) -> runtime.BitArray: ...
         def __next__(self) -> int: ...
 
-    class OkClass(Value): ...
-    class StructDef(Value): ...
+    class interface(Value):
+        ...
+
+    class maxOps(interface):
+        @staticmethod
+        def getNodeByHandle(handle: int) -> runtime.node | None: ...
+
+        @staticmethod
+        def CollapseNodeTo(
+            obj: runtime.GeometryClass,
+            number: int,
+            noWarning: bool
+        ) -> runtime.node: ...
+
+    class OkClass(Value):
+        ...
+
+    class StructDef(Value):
+        ...
+
     class modPanel(StructDef):
         @staticmethod
         def addModToSelection(*args, **kwargs): ...
@@ -44,34 +67,72 @@ class runtime:
         def setCurrentObject(modifier: runtime.modifier) -> bool: ...
         @staticmethod
         def getCurrentObject() -> runtime.modifier: ...
+
         @staticmethod
-        def getModifierIndex(obj: runtime.node, modifier: runtime.modifier) -> int:
+        def getModifierIndex(
+            obj: runtime.node, modifier: runtime.modifier
+        ) -> int:
             '''
             최상단 상단 스택이 1로 부터 시작하는 위치숫자
-            - 위치숫자1 == obj.modifiers[0] 
+            - 위치숫자1 == obj.modifiers[0]
             '''
             ...
+
     class refs(StructDef):
         @staticmethod
         def dependentNodes(*args, **kwargs) -> list: ...
+
     class skinOps(StructDef):
         '''
-        - https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-0820AA26-920F-434D-A6BC-E8B6B57F54AC
+        - <https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-0820AA26-920F-434D-A6BC-E8B6B57F54AC>  # noqa: E501
         '''
         @staticmethod
-        def GetBoneNode(*args, **kwargs) -> runtime.GeometryClass: ...
+        def GetBoneNode(skin, bone_index) -> runtime.GeometryClass: ...
         @staticmethod
         def GetNumberBones(*args, **kwargs) -> int: ...
         @staticmethod
         def GetBoneIDByListID(*args, **kwargs) -> int: ...
         @staticmethod
         def GetBoneNodes(*args, **kwargs) -> list: ...
+
+        @overload
         @staticmethod
-        def ReplaceVertexWeights(*args, **kwargs): ...
+        def ReplaceVertexWeights(
+            Skin,
+            vertex_integer,
+            vertex_bone_integer: int,
+            weight_float: float,
+            node: runtime.node, name: str): ...
+
+        @overload
         @staticmethod
-        def GetVertexWeight(*args, **kwargs): ...
+        def ReplaceVertexWeights(
+            Skin,
+            vertex_integer,
+            vertex_bone_array: Array,
+            weight_array: Array,
+            node: runtime.node,
+            name: str): ...
+
         @staticmethod
-        def GetVertexWeightBoneID(*args, **kwargs): ...
+        def GetVertexWeight(
+            skin,
+            vertex_integer,
+            vertex_bone_integer
+        ) -> float:
+            ...
+
+        @staticmethod
+        def GetVertexWeightBoneID(
+            skin,
+            vertex_integer,
+            vertex_bone_intger
+        ) -> int:
+            '''
+            skin 의 vertex_integer번째 정점의 vertex_bone_intger번째 본의 ID를 반환합니다.
+            '''
+            ...
+
         @staticmethod
         def GetVertexWeightCount(skin: runtime.modifier, vert_number: int)-> int: ...
         @staticmethod
@@ -316,14 +377,21 @@ class runtime:
         '''
         https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-025B6C97-8601-4FEF-ACB8-E47EE0929300
         '''
-        name: str
-        baseObject: runtime.Object
-        '''
-        - [`<node>`.baseObject  A subclass of Node  default: varies](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-00AB0CFA-3190-4A28-A185-4774B684F6D8)
-        - The baseObject속성은 수정자 스택의 기본 개체에 대한 액세스를 제공합니다. 왜냐하면 classOf()장면 노드 객체의 함수는 세계 상태 객체(스택의 상단)의 클래스를 반환합니다. baseObject노드를 만드는 데 사용되는 원래 개체의 클래스를 결정하는 속성. 
-        '''
-        material: runtime.Material|None
-        parent: runtime.node|None
+        category: runtime.Name
+        categories: runtime.Array
+        classes: runtime.Array
+        classID: runtime.Array
+        creatabl: bool
+        localizedName: str
+        ''' 읽기 전용'''
+        nonLocalizedNam: str
+        ''' 읽기 전용'''
+        dllName: str
+        ''' 읽기 전용'''
+        dllIsLoaded: bool
+        ''' 2012이상 - 읽기 전용'''
+        isMSPluginClass: bool
+        ''' 2012이상 - 읽기 전용'''
         ...
     class FaceSelection(Value): ...
     class node(runtime.MAXWrapper):
@@ -333,10 +401,14 @@ class runtime:
 
         name: str
         transform: runtime.Matrix3
-        name: str
+        handle: int
         baseObject: runtime.node
+        '''
+        - [`<node>`.baseObject  A subclass of Node  default: varies](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-00AB0CFA-3190-4A28-A185-4774B684F6D8)
+        - The baseObject속성은 수정자 스택의 기본 개체에 대한 액세스를 제공합니다. 왜냐하면 classOf()장면 노드 객체의 함수는 세계 상태 객체(스택의 상단)의 클래스를 반환합니다. baseObject노드를 만드는 데 사용되는 원래 개체의 클래스를 결정하는 속성. 
+        '''
+        material: runtime.Material|None
         parent: runtime.node|None
-        material: runtime.Material
         children: runtime.Array
         mesh: runtime.TriMesh
         boundingBox: runtime.Box3
