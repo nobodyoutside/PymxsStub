@@ -388,7 +388,7 @@ class runtime:
         @staticmethod
         def getLogLevel(*args, **kwargs) -> None: ...
         @staticmethod
-        def getNetLogFileName(*args, **kwargs) -> None: ...
+        def getNetLogFileName() -> str: ...
         @staticmethod
         def logEntry(*args, **kwargs) -> None: ...
         @staticmethod
@@ -912,7 +912,10 @@ class runtime:
     class convertToMesh(NodeGeneric):
         def __new__(cls, node) -> None: ...
 
-    class Skin(runtime.modifier): ...
+    class Skin(runtime.modifier):
+        always_deform: bool
+        enabledInViews: bool
+        enable: bool
 
     class meshop(StructDef):
         @staticmethod
