@@ -871,10 +871,15 @@ class runtime:
 
     class Box3: ...
     class Material: ...
-    class SetCommandPanelTaskMode(Value):
+    class SetCommandPanelTaskMode(Primitive):
         def __new__(cls, name: runtime.Name) -> None:
             """ name
+            - create
             - modify
+            - hierarchy 
+            - motion 
+            - display 
+            - utility 
             """
             ...
         ...
