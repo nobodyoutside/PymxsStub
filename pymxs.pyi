@@ -660,7 +660,19 @@ class runtime:
         @staticmethod
         def deletePrefClip(*args, **kwargs): ...
         @staticmethod
-        def setTransform(*args, **kwargs): ...
+        def setTransform(
+            obj: runtime.Biped_Object,
+            target: runtime.Name,
+            value: runtime.Point3|runtime.Quat,
+            set_key: bool,
+            limb: runtime.Biped_Object|None = None,
+        ): ...
+        @staticmethod
+        def getTransform(
+            obj: runtime.Biped_Object,
+            target: runtime.Name,
+            limb: runtime.Biped_Object|None = None,
+        ): ...
         @staticmethod
         def setLimbRetargetState(*args, **kwargs): ...
         @staticmethod
@@ -847,8 +859,6 @@ class runtime:
         def getCopyName(*args, **kwargs): ...
         @staticmethod
         def getPrefClipProb(*args, **kwargs): ...
-        @staticmethod
-        def getTransform(*args, **kwargs): ...
         @staticmethod
         def unifyMotion(*args, **kwargs): ...
         @staticmethod
