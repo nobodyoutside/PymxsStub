@@ -27,6 +27,17 @@ class runtime:
     class Value:
         ...
 
+    class Point3(Value):
+        """[<expr>, <expr>, <expr>]
+
+        [2022 api link](https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-1564BD35-50EA-4140-9150-1AECC89F713C)
+        """
+        x: int
+        y: int
+        z: int
+        def __init__(self, *args, **kwargs) -> None: ...
+        ...
+
     class Array(Value, list):
         ...
 
@@ -297,9 +308,9 @@ class runtime:
     @staticmethod
     def cross(*args, **kwargs) -> None: ...
     @staticmethod
-    def normalize(transform: mxs.Point3) -> mxs.Point3: ...
+    def normalize(transform: Point3) -> Point3: ...
     @staticmethod
-    def distance(a: mxs.Point3, b: max.Point3) -> float: ...
+    def distance(a: Point3, b: Point3) -> float: ...
     @staticmethod
     def getCurrentSelection() -> Array: ...
     @staticmethod
@@ -349,6 +360,7 @@ class runtime:
 
 
     class Object(Value):...
+    class MAXWrapper(Value):...
     class MAXObject(Value):...
     class Time(Value, int, float):
         def __init__(self, *args, **kwargs) -> None: ...
@@ -403,6 +415,90 @@ class runtime:
         def SetExpression(self, expression:str) -> bool: ...
 
     class Vertical_Horizontal_Turn(MAXWrapper): ...
+    class node(runtime.MAXWrapper):
+        """[Node : MAXWrapper](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-1C9953AA-4750-4147-91DC-127AF2F7BC87)
+        [Interface : INode](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-0BFEF796-5952-48B0-8929-88475F927649)
+        """
+
+        name: str
+        transform: runtime.Matrix3
+        handle: int
+        baseObject: runtime.node
+        '''
+        - [`<node>`.baseObject  A subclass of Node  default: varies](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-00AB0CFA-3190-4A28-A185-4774B684F6D8)
+        - The baseObject속성은 수정자 스택의 기본 개체에 대한 액세스를 제공합니다. 왜냐하면 classOf()장면 노드 객체의 함수는 세계 상태 객체(스택의 상단)의 클래스를 반환합니다. baseObject노드를 만드는 데 사용되는 원래 개체의 클래스를 결정하는 속성. 
+        '''
+        material: runtime.Material|None
+        parent: runtime.node|None
+        children: runtime.Array
+        mesh: runtime.TriMesh
+        boundingBox: runtime.Box3
+        displayByLayer: bool
+        motionByLayer: bool
+        renderByLayer: bool
+        colorByLayer: bool
+        globalIlluminationByLayer: bool
+        isTarget: bool
+        lookAt: runtime.node|None
+        target: runtime.node|None
+        targetDistance: float
+        isHidden: bool
+        isNodeHidden: bool
+        isHiddenInVpt: bool
+        isFrozen: bool
+        isNodeFrozen: bool
+        isSelected: bool
+        xray: bool
+        boxMode: bool
+        allEdges: bool
+        vertexTicks: bool
+        """ 노드의 모든 정점을 뷰포트에 눈금으로 표시할지 여부를 가져오거나 설정합니다. """
+        backFaceCull: bool
+        showTrajectory: bool
+        ignoreExtents: bool
+        showFrozenInGray: bool
+        wireColor: runtime.Color
+        """  """
+        showLinks: bool
+        showLinksOnly: bool
+        showVertexColors: bool
+        vertexColorType: runtime.Name
+        vertexColorsShaded: bool
+        isDependent: bool
+        visibility: bool
+        controller: runtime.Matrix3Controller
+        renderable: bool
+        inheritVisibility: bool
+        primaryVisibility: bool
+        secondaryVisibility: bool
+        receiveShadows: bool
+        castShadows: bool
+        applyAtmospherics: bool
+        renderOccluded: bool
+        gbufferChannels: bool
+        imageMotionBlurMultiplier: float
+        motionBlurOn: bool
+        motionBlurOnController: runtime.floatController
+        motionBlur: runtime.Name
+        ''' default: #none
+        - #none
+        - #object
+        - #image
+        '''
+        generatecaustics: bool
+        rcvcaustics: bool
+        generateGlobalIllume: bool
+        rcvGlobalIllum: bool
+        ...
+
+    class GeometryClass(node):
+        name: str
+        transform: runtime.Matrix3
+        mesh: runtime.TriMesh
+        numfaces: int
+        wireColor: runtime.Color
+        modifiers: dict[runtime.Name|int, runtime.modifier]|list[runtime.modifier]
+        ...
     class Dummy(GeometryClass): ...
     class Point(GeometryClass): ...
     class Biped_Object(GeometryClass): ...
@@ -456,6 +552,7 @@ class runtime:
         alpha: Type[mxs.Name]
         color_plus_illum: Type[mxs.Name]
         ...
+    class NodeGeneric(Value): ...
     class setFaceSelection(NodeGeneric):
         def __new__(cls, *args, **kwargs) -> None: ...
     class getFaceSelection(NodeGeneric):
@@ -561,16 +658,7 @@ class runtime:
     class Editable_mesh(GeometryClass):...
     class Editable_Poly(GeometryClass):...
     class PolyMeshObject(GeometryClass):...
-    class GeometryClass(node):
-        name: str
-        transform: runtime.Matrix3
-        mesh: runtime.TriMesh
-        numfaces: int
-        wireColor: runtime.Color
-        parent: runtime.node
-        modifiers: dict[runtime.Name|int, runtime.modifier]|list[runtime.modifier]
-        ...
-        
+
     class biped(runtime.StructDef):
         @staticmethod
         def createXtraOpposite(*args, **kwargs): ...
@@ -930,7 +1018,7 @@ class runtime:
             """
             ...
         ...
-    class Point3(mxs.Point3):
+    class Point3(Point3):
         """[<expr>, <expr>, <expr>]
 
         [2022 api link](https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-1564BD35-50EA-4140-9150-1AECC89F713C)
@@ -950,8 +1038,6 @@ class runtime:
         @staticmethod
         def getLayerFromName(*args, **kwargs): ...
         ...
-
-    class NodeGeneric(Value): ...
     class Generic(Value): ...
 
     class getnumtverts(Generic):
