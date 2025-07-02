@@ -31,19 +31,31 @@ class runtime:
     maxFileName: str
     animationRange: runtime.Interval
 
+    @property
+    @classmethod
+    def rootNode(cls) -> runtime.MAXRootNode:...
+
     class Value:
+        @classmethod
+        def getmxsprop(cls, arg1: str) -> Any:
+            """ mxs 속성값을 가져옵니다.
+            :param arg1: mxs 속성 이름으로 None은 에러
+            """
+            ...
         ...
+    class MAXRootNode(Value):...
 
-    class Point3(Value):
-        """[<expr>, <expr>, <expr>]
 
-        [2022 api link](https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-1564BD35-50EA-4140-9150-1AECC89F713C)
-        """
-        x: int
-        y: int
-        z: int
-        def __init__(self, *args, **kwargs) -> None: ...
-        ...
+    # class Point3(Value):
+    #     """[<expr>, <expr>, <expr>]
+
+    #     [2022 api link](https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-1564BD35-50EA-4140-9150-1AECC89F713C)
+    #     """
+    #     x: int
+    #     y: int
+    #     z: int
+    #     def __init__(self, *args, **kwargs) -> None: ...
+    #     ...
 
     class Array(Value, list):
         ...
