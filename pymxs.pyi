@@ -6,7 +6,8 @@
 """
 from __future__ import annotations
 import enum
-from typing import Type, Any, overload, Literal, Iterable, TypeVar
+from contextlib import contextmanager
+from typing import Type, Any, overload, Literal, Iterable, TypeVar, TypeGuard
 import MXSWrapperBase as mxs
 
 _T = TypeVar('_T')
@@ -15,6 +16,10 @@ _Iter = TypeVar('_Iter', bound=Iterable)
 def attime(time):...
   
 def animate(on_off: bool): ...
+
+@contextmanager
+def undo(on_off: bool, name): ...
+
 
 class runtime:
     objects: list
@@ -73,11 +78,11 @@ class runtime:
             interpolationType: int
         ) -> None:
             '''
-            - matchByName 매개 변수가 true로 설정되면 뼈가 이름으로 일치합니다(대화 상자의 Match By Name 버튼을 누르는 것과 동일). 거짓이면 뼈는 인덱스로 일치합니다.
-            - 논쟁 2 ~ 5 개는 대화 상자의 수정 및 접미사 제거 체크 박스의 상태에 해당합니다.
-            - threshold: 임계값 인수는 대화 상자의 임계값에 해당합니다.The threshold argument corresponds to the Threshold value in the dialog. 이것은 가장 가까운 이웃 임계 값입니다.
-            - interpolationType: 마지막 인수는 `Interpolation Type` 드롭다운 목록의 선택에 해당합니다. 가능한 값은 다음과 같습니다.
-                - 0 - Vertex에 의하여 일치
+            :param matchByName: 매개 변수가 true로 설정되면 뼈가 이름으로 일치합니다(대화 상자의 Match By Name 버튼을 누르는 것과 동일). 거짓이면 뼈는 인덱스로 일치합니다.\n
+                - 논쟁 2 ~ 5 개는 대화 상자의 수정 및 접미사 제거 체크 박스의 상태에 해당합니다.
+            :param threshold: 임계값 인수는 대화 상자의 임계값에 해당합니다.The threshold argument corresponds to the Threshold value in the dialog. 이것은 가장 가까운 이웃 임계 값입니다.
+            :param interpolationType: 마지막 인수는 `Interpolation Type` 드롭다운 목록의 선택에 해당합니다. 가능한 값은 다음과 같습니다.\n
+                - 0 - Vertex에 의하여 일치\n
                 -  1 - 얼굴별 경기
             '''
             ...
@@ -258,7 +263,7 @@ class runtime:
             obj: runtime.node, modifier: runtime.modifier
         ) -> int:
             '''
-            최상단 상단 스택이 1로 부터 시작하는 위치숫자
+            :return: 최상단 상단 스택이 1로 부터 시작하는 위치숫자
             - 위치숫자1 == obj.modifiers[0]
             '''
             ...
@@ -284,10 +289,10 @@ class runtime:
         @staticmethod
         def GetBoneName(skin, bone_index: int, nameflag: Literal[0,1]) -> str:
             '''
-            Args:
-                - nameflag: Literal[0,1]
-                    - 0: bone name
-                    - 1: UI list name
+            :param nameflag:
+                - 0: bone name\n
+                - 1: UI list name
+            :type nameflag: Literal[0,1]
             '''
             ...
 
@@ -359,13 +364,13 @@ class runtime:
         @staticmethod
         def loadMenuFile(file:str) -> bool:
             """
-            :args file: filename
+            :param file: filename
             """
             ...
         @staticmethod
         def saveMenuFile(file:str) -> bool:
             """
-            :args file: filename
+            :param file: filename
             """
             ...
         @staticmethod
@@ -393,8 +398,8 @@ class runtime:
         @staticmethod
         def createSubMenuItem(name:str, subMenu:runtime.MixinInterface.menu) -> runtime.MixinInterface.menuItem:
             """
-            :args name: 메뉴 이름
-            :args subMenu: 생성될 메뉴
+            :param name: 메뉴 이름
+            :param subMenu: 생성될 메뉴
             :return: 생성된 아이템
             """
             ...
@@ -405,13 +410,13 @@ class runtime:
         @staticmethod
         def setViewportRightClickMenu(which: runtime.Name, menu) -> bool:
             """
-            :args which: which enums: {#nonePressed|#shiftPressed|#altPressed|#controlPressed|#shiftAndAltPressed|#shiftAndControlPressed|#controlAndAltPressed|#shiftAndAltAndControlPressed}
+            :param which: which enums: {#nonePressed|#shiftPressed|#altPressed|#controlPressed|#shiftAndAltPressed|#shiftAndControlPressed|#controlAndAltPressed|#shiftAndAltAndControlPressed}
             """
             ...
         @staticmethod
         def getViewportRightClickMenu(which: runtime.Name):
             """
-            :args which: which enums: {#nonePressed|#shiftPressed|#altPressed|#controlPressed|#shiftAndAltPressed|#shiftAndControlPressed|#controlAndAltPressed|#shiftAndAltAndControlPressed}
+            :param which: which enums: {#nonePressed|#shiftPressed|#altPressed|#controlPressed|#shiftAndAltPressed|#shiftAndControlPressed|#controlAndAltPressed|#shiftAndAltAndControlPressed}
             :return: runtime.MixinInterface.menu
             """
             ...
@@ -431,18 +436,12 @@ class runtime:
         def numMenus() -> int: ...
         @staticmethod
         def getMenu(index: int) -> runtime.MixinInterface.menu:
-            """
-            :args index: 메뉴 인덱스 (1부터 시작)
-            """
-            ...
+            """:param index: 메뉴 인덱스 (1부터 시작)""";...
         @staticmethod
         def numQuadMenus() -> int: ...
         @staticmethod
         def getQuadMenu(index: int) -> runtime.MixinInterface.quadMenu:
-            """
-            :args index: 메뉴 인덱스 (1부터 시작)
-            """
-            ...
+            """:param index: 메뉴 인덱스 (1부터 시작)""";...
         @staticmethod
         def createMenuItemFromAction(group:str, action: str, categroy:str|None=None) -> runtime.MixinInterface.menuItem: ...
     
@@ -452,10 +451,13 @@ class runtime:
             def setTitle(self, title:str) -> None: ...
             def getTitle(self) -> str: ...
             def numItems(self) -> int: ...
-            def getItem(self, position: int) -> runtime.MixinInterface.menu: ...
-            def addItem(self, item: runtime.MixinInterface.menu, position: int) -> None: ...
+            def getItem(self, position: int) -> runtime.MixinInterface.menu:
+                """:param position: 메뉴 아이템 위치 (1부터 시작)""";...
+            def addItem(self, item: runtime.MixinInterface.menu, position: int) -> None:
+                """:param position: 1부터 시작""";...
             def removeItemByPosition(self, position: int) -> None: ...
-            def removeItem(self, item: runtime.MixinInterface.menu) -> None: ...
+            def removeItem(self, item: runtime.MixinInterface.menu) -> None:
+                """ 메뉴에서 item을 제거 것(삭제 아님)""";...
 
         class menuItem(runtime.Interface):
             def setTitle(self, title:str) -> None: ...
@@ -539,7 +541,7 @@ class runtime:
     @staticmethod
     def getCurrentSelection() -> Array: ...
     @staticmethod
-    def isValidNode(obj: runtime.Value) -> bool: ...
+    def isValidNode(obj: _T|None) -> TypeGuard[_T]: ...
     @staticmethod
     def GetNamedSelSetName(i: int) -> str:
         """ n번째 명명된 선택 세트의 이름을 반환합니다. """
@@ -559,7 +561,20 @@ class runtime:
     @staticmethod
     def getNodeByName(name: str) -> mxs.Node: ...
     @staticmethod
-    def setUserPropVal (obj, key_string, value_string, *args, **kwargs) -> None: ...
+    def setUserPropVal (
+        arg1, arg2:str, arg3:str|int|bool,
+        quoteString:bool=False, encodeCRLF: bool=False
+    ) -> None:
+        r"""
+        :param arg1: 노드
+        :param arg2: 키 문자열
+        :param arg3: 입력할 값
+        :param quoteString: 값을 문자열로 저장할지 여부
+        :param encodeCRLF:   encodeCRLF가 지정되지 않았거나 true로 지정된 경우
+            속성 값의 문자열에 있는 캐리지 리턴 또는 줄 바꿈 문자는 16진수
+            표현으로 변환되고, 그렇지 않으면 16진수 표현으로 변환되지 않습니다.
+            즉, '\r\n'은 '\xd\xa'로 변환됩니다.
+        """;...
     @staticmethod
     def getUserPropVal(obj, key_string, *args, **kwargs) -> str: ...
     @staticmethod
@@ -577,7 +592,8 @@ class runtime:
     @staticmethod
     def getFilenamePath(*args, **kwargs) -> str: ...
     @staticmethod
-    def GetDir(*args, **kwargs) -> str: ...
+    def GetDir(name: runtime.Name) -> str:
+        """:param name: #userMacros 같은 예약어 네임 """;...
     @staticmethod
     def resetMaxFile(noPrompt: runtime.Name) -> None: ...
     @staticmethod
@@ -585,7 +601,6 @@ class runtime:
 
 
     class Object(Value):...
-    class MAXWrapper(Value):...
     class MAXObject(Value):...
     class Time(Value, int, float):
         def __init__(self, *args, **kwargs) -> None: ...
@@ -640,82 +655,7 @@ class runtime:
         def SetExpression(self, expression:str) -> bool: ...
 
     class Vertical_Horizontal_Turn(MAXWrapper): ...
-    class node(runtime.MAXWrapper):
-        """[Node : MAXWrapper](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-1C9953AA-4750-4147-91DC-127AF2F7BC87)
-        [Interface : INode](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-0BFEF796-5952-48B0-8929-88475F927649)
-        """
-
-        name: str
-        transform: runtime.Matrix3
-        handle: int
-        baseObject: runtime.node
-        '''
-        - [`<node>`.baseObject  A subclass of Node  default: varies](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-00AB0CFA-3190-4A28-A185-4774B684F6D8)
-        - The baseObject속성은 수정자 스택의 기본 개체에 대한 액세스를 제공합니다. 왜냐하면 classOf()장면 노드 객체의 함수는 세계 상태 객체(스택의 상단)의 클래스를 반환합니다. baseObject노드를 만드는 데 사용되는 원래 개체의 클래스를 결정하는 속성. 
-        '''
-        material: runtime.Material|None
-        parent: runtime.node|None
-        children: runtime.Array
-        mesh: runtime.TriMesh
-        boundingBox: runtime.Box3
-        displayByLayer: bool
-        motionByLayer: bool
-        renderByLayer: bool
-        colorByLayer: bool
-        globalIlluminationByLayer: bool
-        isTarget: bool
-        lookAt: runtime.node|None
-        target: runtime.node|None
-        targetDistance: float
-        isHidden: bool
-        isNodeHidden: bool
-        isHiddenInVpt: bool
-        isFrozen: bool
-        isNodeFrozen: bool
-        isSelected: bool
-        xray: bool
-        boxMode: bool
-        allEdges: bool
-        vertexTicks: bool
-        """ 노드의 모든 정점을 뷰포트에 눈금으로 표시할지 여부를 가져오거나 설정합니다. """
-        backFaceCull: bool
-        showTrajectory: bool
-        ignoreExtents: bool
-        showFrozenInGray: bool
-        wireColor: runtime.Color
-        """  """
-        showLinks: bool
-        showLinksOnly: bool
-        showVertexColors: bool
-        vertexColorType: runtime.Name
-        vertexColorsShaded: bool
-        isDependent: bool
-        visibility: bool
-        controller: runtime.Matrix3Controller
-        renderable: bool
-        inheritVisibility: bool
-        primaryVisibility: bool
-        secondaryVisibility: bool
-        receiveShadows: bool
-        castShadows: bool
-        applyAtmospherics: bool
-        renderOccluded: bool
-        gbufferChannels: bool
-        imageMotionBlurMultiplier: float
-        motionBlurOn: bool
-        motionBlurOnController: runtime.floatController
-        motionBlur: runtime.Name
-        ''' default: #none
-        - #none
-        - #object
-        - #image
-        '''
-        generatecaustics: bool
-        rcvcaustics: bool
-        generateGlobalIllume: bool
-        rcvGlobalIllum: bool
-        ...
-
+    
     class GeometryClass(node):
         name: str
         transform: runtime.Matrix3
@@ -734,7 +674,7 @@ class runtime:
         quietMode: bool
         enabled: bool
         longevity: runtime.Name
-        ''' #days'''
+        ''' Literal[#days] '''
         @staticmethod
         def loadState(*args, **kwargs) -> None: ...
         @staticmethod
@@ -755,6 +695,9 @@ class runtime:
     class helper(node): ...
 
     class Bone(helper):
+        """
+        :ivar boneScaleType: runtime.Name('none')
+        """
         length: int
         fronfin: bool
         frontfinsize: int
@@ -765,10 +708,6 @@ class runtime:
         boneAutoAlign: bool
         boneScaleType: runtime.Name
         def __init__(self, *args, **kwargs) -> None:
-            '''
-            Args:
-                - boneScaleType: runtime.Name('none')
-            '''
             ...
         
     class vertexColorType(mxs.Name):
@@ -782,6 +721,26 @@ class runtime:
         def __new__(cls, *args, **kwargs) -> None: ...
     class getFaceSelection(NodeGeneric):
         def __new__(cls, *args, **kwargs) -> runtime.BitArray: ...
+    class getUserProp(NodeGeneric):
+        """
+        :param arg1: 값을 가져올 노드 
+        :type arg1: runtime.node
+        :param arg2: key용 문자열
+        :type arg2: str
+        :return: 값을 int, bool, str 중 하나로 반환합니다. 없으면 None.
+        :rtype: int | bool | str | None
+        """
+        def __new__(cls, arg1, arg2:str) -> int|bool|str|None: ...
+    class setUserProp(NodeGeneric):
+        """
+        :param arg1: 값을 가져올 노드 
+        :type arg1: runtime.node
+        :param arg2: key용 문자열
+        :type arg2: str
+        :return: 값을 int, bool, str 중 하나로 반환합니다. 없으면 None.
+        :rtype: int | bool | str | None
+        """
+        def __new__(cls, arg1, arg2:str, arg3:int|bool|str) -> int|bool|str|None: ...
     class MAXWrapper(runtime.Value):
         '''
         https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-025B6C97-8601-4FEF-ACB8-E47EE0929300
@@ -807,7 +766,6 @@ class runtime:
         """[Node : MAXWrapper](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-1C9953AA-4750-4147-91DC-127AF2F7BC87)
         [Interface : INode](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-0BFEF796-5952-48B0-8929-88475F927649)
         """
-
         name: str
         transform: runtime.Matrix3
         handle: int
@@ -869,16 +827,13 @@ class runtime:
         motionBlurOnController: runtime.floatController
         motionBlur: runtime.Name
         ''' default: #none
-        - #none
-        - #object
-        - #image
+        :rtype: Literal["#none", "#object", "#image"]
         '''
         generatecaustics: bool
         rcvcaustics: bool
         generateGlobalIllume: bool
         rcvGlobalIllum: bool
         ...
-
     class floatController(MAXWrapper):...
     class Editable_mesh(GeometryClass):...
     class Editable_Poly(GeometryClass):...
@@ -1243,14 +1198,14 @@ class runtime:
             """
             ...
         ...
-    class GetDir(Primitive):
-        """
-        :arg name:
-        - #userMacros
-        """
-        def __new__(cls, name: runtime.Name) -> str:
-            ...
-        ...
+    # class GetDir(Primitive):
+    #     """
+    #     :arg name:
+    #     - #userMacros
+    #     """
+    #     def __new__(cls, name: runtime.Name) -> str:
+    #         ...
+    #     ...
     class getINISetting(Primitive):
         """[api](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-CF408D64-D4E2-4C39-90DB-62E525D7B45A)
         
@@ -1349,169 +1304,323 @@ class runtime:
     class getNumFaces(Generic):
         def __new__(cls, node) -> int: ...
     class polyop(StructDef):
-        """
-        getNumVDataChannels:<fn>; Public,
-        getNumMaps:<fn>; Public,
-        weldEdgesByThreshold:<fn>; Public,
-        createPolygon:<fn>; Public,
-        createVert:<fn>; Public,
-        collapseDeadStructs:<fn>; Public,
-        getVertsByMatId:<fn>; Public,
-        setFaceFlags:<fn>; Public,
-        setFaceSelection:<fn>; Public,
-        setEDataChannelSupport:<fn>; Public,
-        setMapFace:<fn>; Public,
-        capHolesByEdge:<fn>; Public,
-        cutFace:<fn>; Public,
-        makeVertsPlanar:<fn>; Public,
-        inSlicePlaneMode:<fn>; Public,
-        getFacesEdges:<fn>; Public,
-        getFacesUsingVert:<fn>; Public,
-        getVertsByFlag:<fn>; Public,
-        setVDataChannelSupport:<fn>; Public,
-        setMapSupport:<fn>; Public,
-        weldEdges:<fn>; Public,
-        unHideAllFaces:<fn>; Public,
-        unHideAllVerts:<fn>; Public,
-        attach:<fn>; Public,
-        getBorderFromEdge:<fn>; Public,
-        getDeadVerts:<fn>; Public,
-        getNumVerts:<fn>; Public,
-        getEDataChannelSupport:<fn>; Public,
-        getMapFace:<fn>; Public,
-        makeEdgesPlanar:<fn>; Public,
-        capHolesByFace:<fn>; Public,
-        moveVertsToPlane:<fn>; Public,
-        getVert:<fn>; Public,
-        getFaceDeg:<fn>; Public,
-        getVertsUsingEdge:<fn>; Public,
-        getVertFlags:<fn>; Public,
-        getVDataChannelSupport:<fn>; Public,
-        getMapSupport:<fn>; Public,
-        divideEdge:<fn>; Public,
-        setFaceSmoothGroup:<fn>; Public,
-        autosmooth:<fn>; Public,
-        breakVerts:<fn>; Public,
-        deleteIsoVerts:<fn>; Public,
-        getEdgeVerts:<fn>; Public,
-        getDeadEdges:<fn>; Public,
-        getNumEdges:<fn>; Public,
-        getEDataValue:<fn>; Public,
-        defaultMapFaces:<fn>; Public,
-        moveEdgesToPlane:<fn>; Public,
-        makeFacesPlanar:<fn>; Public,
-        chamferVerts:<fn>; Public,
-        getVerts:<fn>; Public,
-        getFaceCenter:<fn>; Public,
-        getFacesUsingEdge:<fn>; Public,
-        setVertFlags:<fn>; Public,
-        getVDataValue:<fn>; Public,
-        setNumMapVerts:<fn>; Public,
-        collapseEdges:<fn>; Public,
-        getFaceSmoothGroup:<fn>; Public,
-        collapseVerts:<fn>; Public,
-        forceSubdivision:<fn>; Public,
-        getEdgeFaces:<fn>; Public,
-        getDeadFaces:<fn>; Public,
-        getNumFaces:<fn>; Public,
-        setEDataValue:<fn>; Public,
-        applyUVWMap:<fn>; Public,
-        createShape:<fn>; Public,
-        moveFacesToPlane:<fn>; Public,
-        getFaceMatID:<fn>; Public,
-        setVert:<fn>; Public,
-        getSafeFaceCenter:<fn>; Public,
-        getVertsUsingFace:<fn>; Public,
-        getEdgesByFlag:<fn>; Public,
-        getVertSelection:<fn>; Public,
-        checkTriangulation:<fn>; Public,
-        setVDataValue:<fn>; Public,
-        getNumMapVerts:<fn>; Public,
-        splitEdges:<fn>; Public,
-        divideFace:<fn>; Public,
-        meshSmoothByVert:<fn>; Public,
-        propagateFlags:<fn>; Public,
-        getEdgesVerts:<fn>; Public,
-        getHasDeadStructs:<fn>; Public,
-        getHiddenVerts:<fn>; Public,
-        freeEData:<fn>; Public,
-        getVertsByColor:<fn>; Public,
-        getEdgeVis:<fn>; Public,
-        extrudeFaces:<fn>; Public,
-        getFacesMatID:<fn>; Public,
-        moveVert:<fn>; Public,
-        getFaceNormal:<fn>; Public,
-        getEdgesUsingFace:<fn>; Public,
-        getEdgeFlags:<fn>; Public,
-        setVertSelection:<fn>; Public,
-        freeVData:<fn>; Public,
-        setNumMapFaces:<fn>; Public,
-        meshSmoothByEdge:<fn>; Public,
-        slice:<fn>; Public,
-        collapseFaces:<fn>; Public,
-        tessellateByVert:<fn>; Public,
-        fillInMesh:<fn>; Public,
-        getEdgesFaces:<fn>; Public,
-        isFaceDead:<fn>; Public,
-        setHiddenVerts:<fn>; Public,
-        resetEData:<fn>; Public,
-        setFaceColor:<fn>; Public,
-        setEdgeVis:<fn>; Public,
-        bevelFaces:<fn>; Public,
-        setFaceMatID:<fn>; Public,
-        deleteVerts:<fn>; Public,
-        getFaceArea:<fn>; Public,
-        getElementsUsingFace:<fn>; Public,
-        setEdgeFlags:<fn>; Public,
-        getEdgeSelection:<fn>; Public,
-        resetVData:<fn>; Public,
-        getNumMapFaces:<fn>; Public,
-        tessellateByEdge:<fn>; Public,
-        meshSmoothByFace:<fn>; Public,
-        detachVerts:<fn>; Public,
-        resetSlicePlane:<fn>; Public,
-        getFaceVerts:<fn>; Public,
-        isEdgeDead:<fn>; Public,
-        getHiddenFaces:<fn>; Public,
-        setVertColor:<fn>; Public,
-        chamferEdges:<fn>; Public,
-        deleteEdges:<fn>; Public,
-        retriangulate:<fn>; Public,
-        deleteFaces:<fn>; Public,
-        weldVertsByThreshold:<fn>; Public,
-        getFacesByMatId:<fn>; Public,
-        getVertsUsedOnlyByFaces:<fn>; Public,
-        getFacesByFlag:<fn>; Public,
-        setEdgeSelection:<fn>; Public,
-        setNumEDataChannels:<fn>; Public,
-        setMapVert:<fn>; Public,
-        detachEdges:<fn>; Public,
-        tessellateByFace:<fn>; Public,
-        cutVert:<fn>; Public,
-        getSlicePlane:<fn>; Public,
-        getFaceEdges:<fn>; Public,
-        isVertDead:<fn>; Public,
-        setHiddenFaces:<fn>; Public,
-        setNumVDataChannels:<fn>; Public,
-        setNumMaps:<fn>; Public,
-        createEdge:<fn>; Public,
-        setDiagonal:<fn>; Public,
-        flipNormals:<fn>; Public,
-        weldVerts:<fn>; Public,
-        getAllFaces:<fn>; Public,
-        isMeshFilledIn:<fn>; Public,
-        getFaceFlags:<fn>; Public,
-        getFaceSelection:<fn>; Public,
-        getNumEDataChannels:<fn>; Public,
-        getMapVert:<fn>; Public,
-        cutEdge:<fn>; Public,
-        detachFaces:<fn>; Public,
-        capHolesByVert:<fn>; Public,
-        setSlicePlane:<fn>; Public,
-        getFacesVerts:<fn>; Public,
-        getEdgesUsingVert:<fn>; Public,
-        getOpenEdges:<fn>; Public)
-        """
+        """ """
+        @staticmethod
+        def getNumVDataChannels(*args, **kwargs):...
+        @staticmethod
+        def getNumMaps(*args, **kwargs):...
+        @staticmethod
+        def weldEdgesByThreshold(*args, **kwargs):...
+        @staticmethod
+        def createPolygon(*args, **kwargs):...
+        @staticmethod
+        def createVert(*args, **kwargs):...
+        @staticmethod
+        def collapseDeadStructs(*args, **kwargs):...
+        @staticmethod
+        def getVertsByMatId(*args, **kwargs):...
+        @staticmethod
+        def setFaceFlags(*args, **kwargs):...
+        @staticmethod
+        def setEDataChannelSupport(*args, **kwargs):...
+        @staticmethod
+        def setMapFace(*args, **kwargs):...
+        @staticmethod
+        def capHolesByEdge(*args, **kwargs):...
+        @staticmethod
+        def cutFace(*args, **kwargs):...
+        @staticmethod
+        def makeVertsPlanar(*args, **kwargs):...
+        @staticmethod
+        def inSlicePlaneMode(*args, **kwargs):...
+        @staticmethod
+        def getFacesEdges(*args, **kwargs):...
+        @staticmethod
+        def getFacesUsingVert(*args, **kwargs):...
+        @staticmethod
+        def getVertsByFlag(*args, **kwargs):...
+        @staticmethod
+        def setVDataChannelSupport(*args, **kwargs):...
+        @staticmethod
+        def setMapSupport(*args, **kwargs):...
+        @staticmethod
+        def weldEdges(*args, **kwargs):...
+        @staticmethod
+        def unHideAllFaces(*args, **kwargs):...
+        @staticmethod
+        def unHideAllVerts(*args, **kwargs):...
+        @staticmethod
+        def attach(*args, **kwargs):...
+        @staticmethod
+        def getBorderFromEdge(*args, **kwargs):...
+        @staticmethod
+        def getDeadVerts(*args, **kwargs):...
+        @staticmethod
+        def getNumVerts(*args, **kwargs):...
+        @staticmethod
+        def getEDataChannelSupport(*args, **kwargs):...
+        @staticmethod
+        def getMapFace(*args, **kwargs):...
+        @staticmethod
+        def makeEdgesPlanar(*args, **kwargs):...
+        @staticmethod
+        def capHolesByFace(*args, **kwargs):...
+        @staticmethod
+        def moveVertsToPlane(*args, **kwargs):...
+        @staticmethod
+        def getVert(*args, **kwargs):...
+        @staticmethod
+        def getFaceDeg(*args, **kwargs):...
+        @staticmethod
+        def getVertsUsingEdge(*args, **kwargs):...
+        @staticmethod
+        def getVertFlags(*args, **kwargs):...
+        @staticmethod
+        def getVDataChannelSupport(*args, **kwargs):...
+        @staticmethod
+        def getMapSupport(*args, **kwargs):...
+        @staticmethod
+        def divideEdge(*args, **kwargs):...
+        @staticmethod
+        def setFaceSmoothGroup(*args, **kwargs):...
+        @staticmethod
+        def autosmooth(*args, **kwargs):...
+        @staticmethod
+        def breakVerts(*args, **kwargs):...
+        @staticmethod
+        def deleteIsoVerts(*args, **kwargs):...
+        @staticmethod
+        def getEdgeVerts(*args, **kwargs):...
+        @staticmethod
+        def getDeadEdges(*args, **kwargs):...
+        @staticmethod
+        def getNumEdges(*args, **kwargs):...
+        @staticmethod
+        def getEDataValue(*args, **kwargs):...
+        @staticmethod
+        def defaultMapFaces(*args, **kwargs):...
+        @staticmethod
+        def moveEdgesToPlane(*args, **kwargs):...
+        @staticmethod
+        def makeFacesPlanar(*args, **kwargs):...
+        @staticmethod
+        def chamferVerts(*args, **kwargs):...
+        @staticmethod
+        def getVerts(*args, **kwargs):...
+        @staticmethod
+        def getFacesUsingEdge(*args, **kwargs):...
+        @staticmethod
+        def setVertFlags(*args, **kwargs):...
+        @staticmethod
+        def getVDataValue(*args, **kwargs):...
+        @staticmethod
+        def setNumMapVerts(*args, **kwargs):...
+        @staticmethod
+        def collapseEdges(*args, **kwargs):...
+        @staticmethod
+        def getFaceSmoothGroup(*args, **kwargs):...
+        @staticmethod
+        def collapseVerts(*args, **kwargs):...
+        @staticmethod
+        def forceSubdivision(*args, **kwargs):...
+        @staticmethod
+        def getEdgeFaces(*args, **kwargs):...
+        @staticmethod
+        def getDeadFaces(*args, **kwargs):...
+        @staticmethod
+        def getNumFaces(*args, **kwargs):...
+        @staticmethod
+        def setEDataValue(*args, **kwargs):...
+        @staticmethod
+        def applyUVWMap(*args, **kwargs):...
+        @staticmethod
+        def createShape(*args, **kwargs):...
+        @staticmethod
+        def moveFacesToPlane(*args, **kwargs):...
+        @staticmethod
+        def getFaceMatID(*args, **kwargs):...
+        @staticmethod
+        def setVert(*args, **kwargs):...
+        @staticmethod
+        def getSafeFaceCenter(*args, **kwargs):...
+        @staticmethod
+        def getVertsUsingFace(*args, **kwargs):...
+        @staticmethod
+        def getEdgesByFlag(*args, **kwargs):...
+        @staticmethod
+        def getVertSelection(*args, **kwargs):...
+        @staticmethod
+        def checkTriangulation(*args, **kwargs):...
+        @staticmethod
+        def setVDataValue(*args, **kwargs):...
+        @staticmethod
+        def getNumMapVerts(*args, **kwargs):...
+        @staticmethod
+        def splitEdges(*args, **kwargs):...
+        @staticmethod
+        def divideFace(*args, **kwargs):...
+        @staticmethod
+        def meshSmoothByVert(*args, **kwargs):...
+        @staticmethod
+        def propagateFlags(*args, **kwargs):...
+        @staticmethod
+        def getEdgesVerts(*args, **kwargs):...
+        @staticmethod
+        def getHasDeadStructs(*args, **kwargs):...
+        @staticmethod
+        def getHiddenVerts(*args, **kwargs):...
+        @staticmethod
+        def freeEData(*args, **kwargs):...
+        @staticmethod
+        def getVertsByColor(*args, **kwargs):...
+        @staticmethod
+        def getEdgeVis(*args, **kwargs):...
+        @staticmethod
+        def extrudeFaces(*args, **kwargs):...
+        @staticmethod
+        def getFacesMatID(*args, **kwargs):...
+        @staticmethod
+        def moveVert(*args, **kwargs):...
+        @staticmethod
+        def getFaceNormal(*args, **kwargs):...
+        @staticmethod
+        def getEdgesUsingFace(*args, **kwargs):...
+        @staticmethod
+        def getEdgeFlags(*args, **kwargs):...
+        @staticmethod
+        def setVertSelection(*args, **kwargs):...
+        @staticmethod
+        def freeVData(*args, **kwargs):...
+        @staticmethod
+        def setNumMapFaces(*args, **kwargs):...
+        @staticmethod
+        def meshSmoothByEdge(*args, **kwargs):...
+        @staticmethod
+        def slice(*args, **kwargs):...
+        @staticmethod
+        def collapseFaces(*args, **kwargs):...
+        @staticmethod
+        def tessellateByVert(*args, **kwargs):...
+        @staticmethod
+        def fillInMesh(*args, **kwargs):...
+        @staticmethod
+        def getEdgesFaces(*args, **kwargs):...
+        @staticmethod
+        def isFaceDead(*args, **kwargs):...
+        @staticmethod
+        def setHiddenVerts(*args, **kwargs):...
+        @staticmethod
+        def resetEData(*args, **kwargs):...
+        @staticmethod
+        def setFaceColor(*args, **kwargs):...
+        @staticmethod
+        def setEdgeVis(*args, **kwargs):...
+        @staticmethod
+        def bevelFaces(*args, **kwargs):...
+        @staticmethod
+        def setFaceMatID(*args, **kwargs):...
+        @staticmethod
+        def deleteVerts(*args, **kwargs):...
+        @staticmethod
+        def getFaceArea(*args, **kwargs):...
+        @staticmethod
+        def getElementsUsingFace(*args, **kwargs):...
+        @staticmethod
+        def setEdgeFlags(*args, **kwargs):...
+        @staticmethod
+        def getEdgeSelection(*args, **kwargs):...
+        @staticmethod
+        def resetVData(*args, **kwargs):...
+        @staticmethod
+        def getNumMapFaces(*args, **kwargs):...
+        @staticmethod
+        def tessellateByEdge(*args, **kwargs):...
+        @staticmethod
+        def meshSmoothByFace(*args, **kwargs):...
+        @staticmethod
+        def detachVerts(*args, **kwargs):...
+        @staticmethod
+        def resetSlicePlane(*args, **kwargs):...
+        @staticmethod
+        def isEdgeDead(*args, **kwargs):...
+        @staticmethod
+        def getHiddenFaces(*args, **kwargs):...
+        @staticmethod
+        def setVertColor(*args, **kwargs):...
+        @staticmethod
+        def chamferEdges(*args, **kwargs):...
+        @staticmethod
+        def deleteEdges(*args, **kwargs):...
+        @staticmethod
+        def retriangulate(*args, **kwargs):...
+        @staticmethod
+        def deleteFaces(*args, **kwargs):...
+        @staticmethod
+        def weldVertsByThreshold(*args, **kwargs):...
+        @staticmethod
+        def getFacesByMatId(*args, **kwargs):...
+        @staticmethod
+        def getVertsUsedOnlyByFaces(*args, **kwargs):...
+        @staticmethod
+        def getFacesByFlag(*args, **kwargs):...
+        @staticmethod
+        def setEdgeSelection(*args, **kwargs):...
+        @staticmethod
+        def setNumEDataChannels(*args, **kwargs):...
+        @staticmethod
+        def setMapVert(*args, **kwargs):...
+        @staticmethod
+        def detachEdges(*args, **kwargs):...
+        @staticmethod
+        def tessellateByFace(*args, **kwargs):...
+        @staticmethod
+        def cutVert(*args, **kwargs):...
+        @staticmethod
+        def getSlicePlane(*args, **kwargs):...
+        @staticmethod
+        def getFaceEdges(*args, **kwargs):...
+        @staticmethod
+        def isVertDead(*args, **kwargs):...
+        @staticmethod
+        def setHiddenFaces(*args, **kwargs):...
+        @staticmethod
+        def setNumVDataChannels(*args, **kwargs):...
+        @staticmethod
+        def setNumMaps(*args, **kwargs):...
+        @staticmethod
+        def createEdge(*args, **kwargs):...
+        @staticmethod
+        def setDiagonal(*args, **kwargs):...
+        @staticmethod
+        def flipNormals(*args, **kwargs):...
+        @staticmethod
+        def weldVerts(*args, **kwargs):...
+        @staticmethod
+        def getAllFaces(*args, **kwargs):...
+        @staticmethod
+        def isMeshFilledIn(*args, **kwargs):...
+        @staticmethod
+        def getFaceFlags(*args, **kwargs):...
+        @staticmethod
+        def getFaceSelection(*args, **kwargs):...
+        @staticmethod
+        def getNumEDataChannels(*args, **kwargs):...
+        @staticmethod
+        def getMapVert(*args, **kwargs):...
+        @staticmethod
+        def cutEdge(*args, **kwargs):...
+        @staticmethod
+        def detachFaces(*args, **kwargs):...
+        @staticmethod
+        def capHolesByVert(*args, **kwargs):...
+        @staticmethod
+        def setSlicePlane(*args, **kwargs):...
+        @staticmethod
+        def getFacesVerts(*args, **kwargs):...
+        @staticmethod
+        def getEdgesUsingVert(*args, **kwargs):...
+        @staticmethod
+        def getOpenEdges(*args, **kwargs):...
         @staticmethod
         def getFaceCenter(*args, **kwargs) -> runtime.Point3:
             """<point3>polyop.getFaceCenter <Mesh mesh> <int faceIndex> node:<node=unsupplied>"""
@@ -1639,9 +1748,20 @@ class runtime:
             ...
 
     @staticmethod
-    def maxVersion(*args, **kwargs) -> list:
-        """#(25000, 62, 0, 25, 2, 2, 3312, 2023, ".2.2 Update")"""
-        ...
+    def maxVersion() -> list[int| str]:
+        """:return: #(25000, 62, 0, 25, 2, 2, 3312, 2023, ".2.2 Update")
+            - 25000: 릴리스 번호
+            - 62: API버전
+            - 0: SDK 개정판
+            - 25: 주요 버전
+            - 업데이트 버전
+            - 핫픽스 번호
+            - 빌드 번호
+            - 연도
+            - 버전 설명
+        :rtype: list[int]
+        [wep api](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-53F8D6CE-A5A6-4353-BE48-4298BBE107DE)
+        """;...
 
     @staticmethod
     def addModifier(*args, **kwargs) -> None: ...
@@ -1674,6 +1794,5 @@ class runtime:
     @staticmethod
     def setSelectionLevel(obj: runtime.node, level: Name):
         """
-        parm:
-            level: vertex
+        :type level: literal[#object, #vertex, #edge, #face]
         """
