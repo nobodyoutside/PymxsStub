@@ -115,6 +115,36 @@ class runtime:
 
     class StructDef(Value):
         ...
+    class callbacks(StructDef):
+        @staticmethod
+        def addScript(
+            arg1:runtime.Name,
+            arg2:str,
+            id:runtime.Name=runtime.Name('')
+        ):
+            """
+            :param arg1: 콜벡타입이름
+            :param arg2: 실행 코드 문자열
+            """;...
+        @staticmethod
+        def show(arg1:runtime.Name, asArray:bool=False) -> list[list]|None:
+            """
+            :param arg1: 콜백타입이름
+            :param asArray: 콜백함수들을 배열로 반환할지 여부, 아니면 리스터 창에 출력만함
+            :return: 콜백함수들 정보
+                #(#(#filePreOpen, #PhysXPlugin, false, false, "px_filePreOpen()", false),
+            """
+            ...
+        @staticmethod
+        def notificationParam(*args, **kwargs):
+            ...
+        @staticmethod
+        def removeScripts(id:runtime.Name|None=None):
+            """ 콜백함수 제거 """
+            ...
+        @staticmethod
+        def broadcastCallback(*args, **kwargs):
+            ...
     class custAttributes(StructDef):
         @staticmethod
         def unRegisterDefLoadCallback(*args, **kwargs):
