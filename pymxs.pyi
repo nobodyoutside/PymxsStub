@@ -18,7 +18,7 @@ def attime(time):...
 def animate(on_off: bool): ...
 
 @contextmanager
-def undo(on_off: bool, name=''): ...
+def undo(on_off: bool, name): ...
 
 
 class runtime:
@@ -756,7 +756,7 @@ class runtime:
     class rotationController(MAXWrapper): ...
     class Euler_XYZ(rotationController): ...
     class tcb_rotation(rotationController): ...
-    class rotation_list(runtime.list, rotationController):
+    class rotation_list(runtime.list,rotationController):
         available: runtime.Quat
         average: bool
         weight: runtime.Array[float]
@@ -1821,14 +1821,26 @@ class runtime:
         """
         [2022 api link](https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-D77C780A-4E8A-4528-949F-CC09AAE048DA)
         """
+        rotationpart: runtime.Quat
+        """ read-only """
+        translationpart: runtime.Point3
+        """ read-only """
+        scalerotationpart: runtime.Point3
+        """ read-only 이동을 제외한 회전과 크기값 """
+        scalepart: runtime.Point3
+        """ read-only """
+
         rotation: runtime.Quat
         """ 회전값 """
         position: runtime.Point3
+
         row1: runtime.Point3
         row2: runtime.Point3
         row3: runtime.Point3
         row4: runtime.Point3
         translation: runtime.Point3
+        determinantsign: int
+        """ 행렬의 행렬식의 부호를 반환합니다. 기본1 이네,"""
         @overload
         def __init__(self, flag: Literal[0, 1]) -> None: ...
 
@@ -1968,3 +1980,12 @@ class runtime:
         """
         :type level: literal[#object, #vertex, #edge, #face]
         """
+    @staticmethod
+    def close_enough(arg1: float, arg2: float, arg3:int):
+        """
+        :param arg1: 비교대상1
+        :param arg2: 비교대상2
+        :param arg3: 오차 보간기준, 기본10을 추천
+        :return: bool
+        """
+        ...
