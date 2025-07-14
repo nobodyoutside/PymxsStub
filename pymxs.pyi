@@ -679,9 +679,14 @@ class runtime:
     @staticmethod
     def classof(*args, **kwargs) -> type: ...
     @staticmethod
-    def cross(*args, **kwargs) -> None: ...
+    def cross(arg1: Point3, arg2: Point3) -> Point3:
+        """ [help2024](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-1564BD35-50EA-4140-9150-1AECC89F713C)
+        :return: 두 벡터로 정의된 평면에 항상 수직인 세 번째 벡터이며, 방향은 오른손 법칙에 의해 결정되는 백터를 반환 """
+        ...
     @staticmethod
-    def normalize(transform: Point3) -> Point3: ...
+    def normalize(transform: Point3) -> Point3:
+        """ [help2024](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-1564BD35-50EA-4140-9150-1AECC89F713C) """
+        ...
     @staticmethod
     def distance(a: Point3, b: Point3) -> float: ...
     @staticmethod
@@ -1841,6 +1846,9 @@ class runtime:
         translation: runtime.Point3
         determinantsign: int
         """ 행렬의 행렬식의 부호를 반환합니다. 기본1 이네,"""
+        @overload
+        def __init__(self) -> None: ...
+        
         @overload
         def __init__(self, flag: Literal[0, 1]) -> None: ...
 
