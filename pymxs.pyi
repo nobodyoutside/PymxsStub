@@ -7,11 +7,18 @@
 from __future__ import annotations
 import enum
 from contextlib import contextmanager
-from typing import Type, Any, overload, Literal, Iterable, TypeVar, TypeGuard, Sequence
+from typing import (
+    Type, Any, overload, Literal, Iterable, TypeVar, TypeGuard, Sequence, Iterator,
+    NoReturn, Optional, List
+)
+import warnings
+from typing_extensions import Self
 import MXSWrapperBase as mxs
 
 _T = TypeVar('_T')
 _Iter = TypeVar('_Iter', bound=Iterable)
+type MessageBoxIconType = Literal['warning', 'information', 'question', 'critical']
+
 
 def attime(time):...
   
@@ -22,20 +29,18 @@ def undo(on_off: bool, name): ...
 
 
 class runtime:
-    objects: list
-    selection: list
-    currentTime: int
+    rootNode: runtime.MAXRootNode
+    objects: runtime.ObjectSet
+    selection: runtime.ObjectSet
+    currentTime: runtime.Time
     maxfilepath: str
     maxFilePath: str
     maxfilename: str
     maxFileName: str
     animationRange: runtime.Interval
     animateMode: bool
-    sliderTime: runtime.Time
-
-    @property
-    @classmethod
-    def rootNode(cls) -> runtime.MAXRootNode:...
+    sliderTime: runtime.Time|int|float
+    SelectionSets: runtime.SelectionSetArray
 
     class Value:
         def __init__(self, *args, **kwargs) -> None: ...
@@ -46,8 +51,31 @@ class runtime:
             """
             ...
         ...
-    class MAXRootNode(Value):...
-
+    class SelectionSetArray(Value):
+        @overload
+        def __getitem__(self, name: str):...
+        @overload
+        def __getitem__(self, index: int):
+            """ 선택셋 배열에서 인덱스에 해당하는 선택셋을 반환합니다.
+            :param index: 선택셋 인덱스 (0부터 시작)
+            """
+        @overload
+        def __setitem__(self, name: int, value) -> None:...
+        @overload
+        def __setitem__(self, index: str, value) -> None:
+            """ 선택셋 배열에서 인덱스에 해당하는 선택셋을 설정합니다.
+            :param index: 선택셋 인덱스 (0부터 시작)
+            :param value: 설정할 선택셋
+            """
+    class MaxObject(Value):
+        ...
+    class MAXRootNode(Value):
+        children: runtime.Array[runtime.node]
+    class Set(Sequence[_T], Value):
+        def __iter__(self) -> Iterator[_T]: ...
+        def __next__(self) -> _T: ...
+        def __len__(self) -> int: ...
+    class ObjectSet(Set):...
 
     # class Point3(Value):
     #     """[<expr>, <expr>, <expr>]
@@ -60,8 +88,15 @@ class runtime:
     #     def __init__(self, *args, **kwargs) -> None: ...
     #     ...
 
-    class Array(Sequence[_T], Value):...
-
+    class Array(Sequence[_T], Value):
+        def __iter__(self) -> Iterator[_T]: ...
+        def __next__(self) -> _T: ...
+        def __len__(self) -> int: ...
+        @overload
+        def __getitem__(self, index: int) -> _T: ...
+        
+        @overload
+        def __getitem__(self, index: slice) -> Self: ...
     class Interval(Value):
         start: runtime.Time
         end: runtime.Time
@@ -483,6 +518,98 @@ class runtime:
         '''
         ...
     class Interface(runtime.Value): ...
+    class LayerProperties(Interface):
+        # --- Properties ---
+        on: bool
+        lock: bool
+        current: bool
+        wireColor: runtime.Color
+        isGIExcluded: bool
+        renderable: bool
+        inheritVisibility: bool
+        primaryVisibility: bool
+        secondaryVisibility: bool
+        receiveshadows: bool
+        castShadows: bool
+        applyAtmospherics: bool
+        renderOccluded: bool
+        ishidden: bool
+        isfrozen: bool
+        boxmode: bool
+        backfacecull: bool
+        alledges: bool
+        vertexTicks: bool
+        showTrajectory: bool
+        xray: bool
+        ignoreExtents: bool
+        showFrozenInGray: bool
+        showVertexColors: bool
+        vertexColorsShaded: bool
+        visibility: float
+        imageMotionBlurMultiplier: float
+        motionBlurOn: bool
+        motionblur: Literal["none", "object", "image"]
+        display: Literal["viewport", "boundingbox", "wireframe", "shaded"]
+
+        # --- Read-only Properties ---
+        @property
+        def name(self) -> str: ...
+        @property
+        def INodeGIProperties(self) -> Any: ... # 실제 GIProperties 인터페이스 타입으로 대체 가능
+        @property
+        def layerAsRefTarg(self) -> runtime.MaxObject: ...
+
+        # --- Methods ---
+        def addnode(self, node: runtime.node) -> None: ...
+        def addnodes(self, nodes: List[runtime.node]) -> None: ...
+        def select(self, OnOff: bool) -> None: ...
+        def setname(self, name: str) -> bool: ...
+        def nodes(self) -> List[runtime.node]:
+            """
+            이 메서드는 MAXScript에서 out 파라미터를 사용하지만,
+            Python에서는 반환 값으로 노드 리스트를 받는 것이 일반적입니다.
+            """
+            ...
+        def getParent(self) -> Optional[runtime.LayerProperties]: ...
+        def setParent(self, parent: runtime.LayerProperties) -> bool: ...
+        def getChild(self, index: int) -> Optional[runtime.LayerProperties]: ...
+        def getNumChildren(self) -> int: ...
+        def canDelete(self) -> bool: ...
+        def getNumNodes(self) -> int: ...
+        def hasSceneXRefNodesInHierarchy(self) -> bool: ...
+    class INode(Interface):
+        boneEnable: bool
+        posTaskWeight: float
+        rotTaskWeight: float
+        boneAutoAlign: bool
+        boneFreezeLength: bool
+        boneScaleType: runtime.Name
+        """ [#scale, #squash, #none] """
+        stretchTM: runtime.Matrix3
+        boneAxis: runtime.Name
+        """ [#x, #y, #z] """
+        boneAxisFlip: bool
+        primaryVisibility: bool
+        secondaryVisibility: bool
+        applyAtmospherics: bool
+        vertexColorType: runtime.Name
+        """ [#color, #illum, #alpha. #color_plus_illum, #soft_select, #map_channel] """
+        showVertexColors: int
+        shadeVertexColors: int
+        vertexColorMapChannel: int
+        handle: int
+        isSceneXRefNode: bool
+        posInParent: runtime.Point3
+        rotInParent: runtime.Point3
+        scaleInParent: runtime.Point3
+        scaleOrientInParent: runtime.Quat
+        wasLoadedByLastMerge: bool
+        OverrideMaterialEnabled: bool
+        def setBoneEnable(self, value: bool, time: runtime.Time) -> None: ...
+        def realignBoneToChild(self) -> None: ...
+        def resetBoneStretch(self) -> None: ...
+
+
     class menuMan(Interface):
         @staticmethod
         def loadMenuFile(file:str) -> bool:
@@ -618,7 +745,8 @@ class runtime:
             def getNode(self, nodeNumber: int) -> runtime.node: ...
             def getWeight(self, targetNumber: int) -> float: ...
             def setWeight(self, targetNumber: int, weight: float) -> bool: ...
-            def appendTarget(self, target:runtime.node, weight:float) -> bool: ...
+            #  공통요소 아님
+            # def appendTarget(self, target:runtime.node, weight:float) -> bool: ...
             def deleteTarget(self, targetNumber: int) -> bool: ...
 
     class macros(StructDef):
@@ -698,7 +826,7 @@ class runtime:
         """ n번째 명명된 선택 세트의 이름을 반환합니다. """
         ...
     @staticmethod
-    def GetNamedSelSetItem(i: int, n: int) -> mxs.Node:
+    def GetNamedSelSetItem(i: int, n: int) -> runtime.node:
         """ 특정 명명된 선택 세트에서 의 포인터를 검색합니다.INode """
         ...
     @staticmethod
@@ -710,7 +838,7 @@ class runtime:
         """ 명명된 선택 세트의 항목 수를 반환합니다. """
         ...
     @staticmethod
-    def getNodeByName(name: str) -> mxs.Node: ...
+    def getNodeByName(name: str) -> runtime.node|None: ...
     @staticmethod
     def setUserPropVal (
         arg1, arg2:str, arg3:str|int|bool,
@@ -756,7 +884,7 @@ class runtime:
     class Object(Value):...
     class MAXObject(Value):...
     class Time(Value, int, float):
-        frame: float
+        frame: float|int
         def __init__(self, *args, **kwargs) -> None: ...
     class rotationController(MAXWrapper): ...
     class Euler_XYZ(rotationController): ...
@@ -767,10 +895,11 @@ class runtime:
         weight: runtime.Array[float]
         list: runtime.list
     class Orientation_Constraint(constraints, rotationController):
-        ...
+        def appendTarget(self, target:runtime.node, weight:float) -> bool: ...
     class positionController(MAXWrapper):
         """ """;...
-    class Position_Constraint(constraints, positionController): ...
+    class Position_Constraint(constraints, positionController):
+        def appendTarget(self, target:runtime.node, weight:float) -> bool: ...
     class position_list(positionController):
         weight: runtime.Array[float]
         average: bool
@@ -787,6 +916,8 @@ class runtime:
     class Position_XYZ(MAXWrapper): ...
     class Matrix3Controller(MAXWrapper): ...
     class prs(Matrix3Controller): ...
+    class Link_Constraint(runtime.constraints, Matrix3Controller):
+        def addTarget(self, target:runtime.node, frameNo:int) -> bool: ...
     class transform_script(Matrix3Controller):
         class Type(enum.Enum):
             unknown = runtime.Name("unknown")
@@ -839,11 +970,14 @@ class runtime:
         numfaces: int
         wireColor: runtime.Color
         modifiers: dict[runtime.Name|int, runtime.modifier]|list[runtime.modifier]
-        def __init__(self, name:str, **kwargs) -> None: ...
+        def __init__(self, name:str='', **kwargs) -> None: ...
         ...
     class Dummy(GeometryClass): ...
     class Point(GeometryClass): ...
-    class Biped_Object(GeometryClass): ...
+    class Biped_Object(GeometryClass):
+        position: NoReturn
+        rotation: NoReturn
+        scale: NoReturn
 
     class logsystem(StructDef):
         logDays: int
@@ -939,7 +1073,7 @@ class runtime:
         ''' 2012이상 - 읽기 전용'''
         ...
     class FaceSelection(Value): ...
-    class node(runtime.MAXWrapper):
+    class node(INode, runtime.MAXWrapper):
         """[Node : MAXWrapper](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-1C9953AA-4750-4147-91DC-127AF2F7BC87)
         [Interface : INode](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-0BFEF796-5952-48B0-8929-88475F927649)
         """
@@ -953,7 +1087,7 @@ class runtime:
         '''
         material: runtime.Material|None
         parent: runtime.node|None
-        children: runtime.Array
+        children: runtime.Array[Self]
         mesh: runtime.TriMesh
         boundingBox: runtime.Box3
         displayByLayer: bool
@@ -984,7 +1118,6 @@ class runtime:
         """  """
         showLinks: bool
         showLinksOnly: bool
-        showVertexColors: bool
         vertexColorType: runtime.Name
         vertexColorsShaded: bool
         isDependent: bool
@@ -1013,6 +1146,7 @@ class runtime:
         ...
     class floatController(MAXWrapper):...
     class Editable_mesh(GeometryClass):...
+    class BoneGeometry(GeometryClass):...
     class Editable_Poly(GeometryClass):...
     class PolyMeshObject(GeometryClass):...
 
@@ -1412,6 +1546,10 @@ class runtime:
         @staticmethod
         def getLayerFromName(*args, **kwargs): ...
         ...
+        @staticmethod
+        def getLayer(index: int) -> runtime.LayerProperties:...
+        @staticmethod
+        def newLayerFromName(name: str) -> runtime.LayerProperties:...
     class Generic(Value): ...
 
     class getnumtverts(Generic):
@@ -1818,7 +1956,7 @@ class runtime:
         @staticmethod
         def createBone(startPos:runtime.Point3,
                        endPos: runtime.Point3,
-                       zAxis: runtime.Point3) -> runtime.Bone: ...
+                       zAxis: runtime.Point3) -> runtime.BoneGeometry: ...
     class controller: ...
     class Quat: ...
 
@@ -1982,7 +2120,7 @@ class runtime:
         pNode: runtime.node, node: runtime.node, move=True
     ): ...
     @staticmethod
-    def classOf(obj: Value): ...
+    def classOf(obj: _T) -> type[_T]: ...
     @staticmethod
     def setSelectionLevel(obj: runtime.node, level: Name):
         """
@@ -1995,5 +2133,81 @@ class runtime:
         :param arg2: 비교대상2
         :param arg3: 오차 보간기준, 기본10을 추천
         :return: bool
+        """
+        ...
+    @staticmethod
+    def MatchPattern(arg1: str, pattern: str , ignoreCase:bool=False) -> bool:
+        """ [help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-A6A60FC7-6206-4FFC-80E2-0EF8544BE2C4)
+        :param arg1: 검사할 문자열
+        :param pattern: 패턴
+        :param ignoreCase: 대소문자 구분 여부, 기본값은 False
+        :return: 매칭됨
+        """
+        ...
+    @staticmethod
+    def queryBox(arg1: str, title="MAXScript", beep=True,
+        icon: runtime.Name = ...,
+        defaultButton: int=1, dontShowAgain: Any=..., helpID: int=...,
+        showHoldButton=..., parent: int=..., extraFlags:int=...
+    ):
+        """[help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-7A4AA91A-0DEB-470B-AD6B-2E7A3A105BD0)
+        :param icon: #question|#information|#warning|#critical
+        :param parent: parent HWND, 기본값 3ds Max window임 -1은 임의
+        :param extraFlags: 추가 플래그, 
+            0x00002000L - MB_TASKMODAL
+            0x00001000L - MB_SYSTEMMODAL
+            0x00008000L - MB_NOFOCUS
+            0x00010000L - MB_SETFOREGROUND
+            0x00040000L - MB_TOPMOST
+            0x00080000L - MB_RIGHT
+            0x00100000L - MB_RTLREADING
+            0x10000000L - show dialog using win32 MessageBox()
+            0x40000000L - show dialog using MaxMessageBox hwnd parent version
+
+        """
+    @staticmethod
+    def setINISetting(arg1: str, arg2: str, arg3: str, arg4: str) -> None:
+        """[api](https://help.autodesk.com/view/MAXDEV/2024/ENU/)
+        :param arg1: file_path
+        :param arg2: section
+        :param arg3: key
+        :param arg4: value
+        """
+        ...
+    @staticmethod
+    def DisableSceneRedraw() -> None:...
+    @staticmethod
+    def EnableSceneRedraw() -> None:...
+    @staticmethod
+    def substituteString(arg1: str, arg2:str, arg3:str) -> str:
+        """[help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-A6A60FC7-6206-4FFC-80E2-0EF8544BE2C4)
+        :param arg1: 원본 문자열
+        :param arg2: 찾을 문자열
+        :param arg3: 대체할 문자열
+        :return: 대체된 원본 문자열
+        """
+        ...
+    @staticmethod
+    @overload
+    def setTransformLockFlags(arg1: Sequence[_T], arg2: runtime.Name):
+        """
+        :param arg1: node or list of nodes
+        :param arg2: transform lock flags, [#none, #all]
+        """
+        ...
+    @staticmethod
+    @overload
+    def setTransformLockFlags(arg1: node, arg2: runtime.Name):
+        """
+        :param arg1: node or list of nodes
+        :param arg2: transform lock flags, [#none, #all]
+        """
+        ...
+    @staticmethod
+    def ForceCompleteRedraw(doDisabled: bool) -> None:
+        """[3dsMaxHelp](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-52E2EA19-D42C-4240-A061-CB0DC364267E)
+        이 방법을 모두 사용하면 모든 뷰포트가 완전히 다시 그려집니다. 이 방법은 문자 그대로 모든 것 (모든 개체, 모든 화면 직사각형, 모든보기)이 유효하지 않은 것으로 표시되고 전체 장면이 재생되도록합니다. 그러나 개별 개체 파이프라인 캐시는 플러시되지 않습니다. 이 루틴은 느리다는 보장이 있습니다.
+
+        :param doDisabled: true이면 비활성화된 뷰포트도 다시 그려집니다.
         """
         ...
