@@ -9,24 +9,31 @@ import enum
 from contextlib import contextmanager
 from typing import (
     Type, Any, overload, Literal, Iterable, TypeVar, TypeGuard, Sequence, Iterator,
-    NoReturn, Optional, List
+    NoReturn, Optional, List, Protocol, Union, Tuple, Callable, TypeAlias
 )
 import warnings
 from typing_extensions import Self
-import MXSWrapperBase as mxs
 
 _T = TypeVar('_T')
 _Iter = TypeVar('_Iter', bound=Iterable)
 type MessageBoxIconType = Literal['warning', 'information', 'question', 'critical']
+T = TypeVar('T')
+ClassInfo: TypeAlias = Union[Type[T] , Tuple['ClassInfo[T]', ...]]
 
-
-def attime(time):...
+def attime(time: float):...
   
 def animate(on_off: bool): ...
 
 @contextmanager
 def undo(on_off: bool, name): ...
 
+
+class _Stub이동속성():
+    pos: runtime.Point3
+    scale: runtime.Point3
+    position: runtime.Point3
+    rotation: runtime.Quat
+    scale: runtime.Point3
 
 class runtime:
     rootNode: runtime.MAXRootNode
@@ -39,17 +46,25 @@ class runtime:
     maxFileName: str
     animationRange: runtime.Interval
     animateMode: bool
-    sliderTime: runtime.Time|int|float
+    sliderTime: runtime.Time
     SelectionSets: runtime.SelectionSetArray
+    selectionSets: runtime.SelectionSetArray
 
     class Value:
         def __init__(self, *args, **kwargs) -> None: ...
         @classmethod
         def getmxsprop(cls, arg1: str) -> Any:
-            """ mxs 속성값을 가져옵니다.
-            :param arg1: mxs 속성 이름으로 None은 에러
+            """ runtime 속성값을 가져옵니다.
+            :param arg1: runtime 속성 이름으로 None은 에러
             """
             ...
+        ...
+    class BitMap(Value):
+        ...
+    class MAXKey(Value):
+        # tension: Any
+        # continuity: Any
+        # bias: Any
         ...
     class SelectionSetArray(Value):
         @overload
@@ -152,6 +167,24 @@ class runtime:
 
     class StructDef(Value):
         ...
+    class viewport(StructDef):
+        @staticmethod
+        def getType() -> runtime.Name: ...
+        @staticmethod
+        def setType(name: runtime.Name) -> None: ...
+        @staticmethod
+        def getTM() -> runtime.Matrix3:
+            """
+            현재 뷰포트의 변환 행렬을 반환합니다.
+            :return: 변환 행렬
+            """
+            ...
+    class TCBDefaultParams(StructDef):
+        easeFrom: Any
+        easeTo: Any
+        continuity: Any
+        bias: Any
+        tension: Any
     class callbacks(StructDef):
         @staticmethod
         def addScript(
@@ -787,7 +820,8 @@ class runtime:
     @staticmethod
     def delete(*args, **kwargs) -> Any: ...
     @staticmethod
-    def isKindOf(arg1: Any, arg2:Type[_T]) -> TypeGuard[_T]: ...
+    def isKindOf(arg1: Any, arg2:ClassInfo[_T]) -> TypeGuard[_T]:
+        return isinstance(arg1, arg2)
     @staticmethod
     def messageBox(*args, **kwargs) -> Any: ...
     @staticmethod
@@ -838,7 +872,7 @@ class runtime:
         """ 명명된 선택 세트의 항목 수를 반환합니다. """
         ...
     @staticmethod
-    def getNodeByName(name: str) -> runtime.node|None: ...
+    def getNodeByName(name: str) -> runtime.GeometryClass | runtime.helper | None: ...
     @staticmethod
     def setUserPropVal (
         arg1, arg2:str, arg3:str|int|bool,
@@ -884,7 +918,7 @@ class runtime:
     class Object(Value):...
     class MAXObject(Value):...
     class Time(Value, int, float):
-        frame: float|int
+        frame: float
         def __init__(self, *args, **kwargs) -> None: ...
     class rotationController(MAXWrapper): ...
     class Euler_XYZ(rotationController): ...
@@ -914,7 +948,7 @@ class runtime:
         def setActive(self, arg1: int) -> None:...
 
     class Position_XYZ(MAXWrapper): ...
-    class Matrix3Controller(MAXWrapper): ...
+    class Matrix3Controller(MAXWrapper, _Stub이동속성): ...
     class prs(Matrix3Controller): ...
     class Link_Constraint(runtime.constraints, Matrix3Controller):
         def addTarget(self, target:runtime.node, frameNo:int) -> bool: ...
@@ -964,6 +998,7 @@ class runtime:
     class Vertical_Horizontal_Turn(MAXWrapper): ...
     
     class GeometryClass(node):
+        boxmode: bool
         name: str
         transform: runtime.Matrix3
         mesh: runtime.TriMesh
@@ -971,13 +1006,10 @@ class runtime:
         wireColor: runtime.Color
         modifiers: dict[runtime.Name|int, runtime.modifier]|list[runtime.modifier]
         def __init__(self, name:str='', **kwargs) -> None: ...
-        ...
-    class Dummy(GeometryClass): ...
-    class Point(GeometryClass): ...
-    class Biped_Object(GeometryClass):
-        position: NoReturn
-        rotation: NoReturn
-        scale: NoReturn
+
+    class Dummy(helper, _Stub이동속성): ...
+    class Point(GeometryClass, _Stub이동속성): ...
+    class Biped_Object(GeometryClass):...
 
     class logsystem(StructDef):
         logDays: int
@@ -1003,7 +1035,7 @@ class runtime:
         @staticmethod
         def saveState(*args, **kwargs) -> None: ...
 
-    class helper(node): ...
+    class helper(node, _Stub이동속성): ...
 
     class Bone(helper):
         """
@@ -1017,15 +1049,15 @@ class runtime:
         boneEnable: bool
         boneFreeaeLength: bool
         boneAutoAlign: bool
-        boneScaleType: runtime.Name
+        boneScaleType: runtime.Name = runtime.Name('none')
         def __init__(self, *args, **kwargs) -> None:
             ...
         
-    class vertexColorType(mxs.Name):
-        color: Type[mxs.Name]
-        illum: Type[mxs.Name]
-        alpha: Type[mxs.Name]
-        color_plus_illum: Type[mxs.Name]
+    class vertexColorType(runtime.Name):
+        color: Type[runtime.Name]
+        illum: Type[runtime.Name]
+        alpha: Type[runtime.Name]
+        color_plus_illum: Type[runtime.Name]
         ...
     class NodeGeneric(Value): ...
     class setFaceSelection(NodeGeneric):
@@ -1144,6 +1176,8 @@ class runtime:
         generateGlobalIllume: bool
         rcvGlobalIllum: bool
         ...
+    class camera(node, _Stub이동속성):...
+    class Freecamera(camera): ...
     class floatController(MAXWrapper):...
     class Editable_mesh(GeometryClass):...
     class BoneGeometry(GeometryClass):...
@@ -1294,7 +1328,7 @@ class runtime:
         @staticmethod
         def createScaleSubAnims(*args, **kwargs): ...
         @staticmethod
-        def collapseAtLayer(*args, **kwargs): ...
+        def collapseAtLayer(ctrl, index: int) -> None: ...
         @staticmethod
         def addMultipleFootprints(*args, **kwargs): ...
         @staticmethod
@@ -1537,12 +1571,12 @@ class runtime:
         def __init__(self, *args, **kwargs) -> None: ...
         ...
 
-    class Color(mxs.Color):
+    class Color(runtime.Value):
         def __init__(self, *args, **kwargs) -> None: ...
 
-    class Biped(mxs.Biped): ...
+    class Biped(runtime.Value): ...
 
-    class LayerManager(mxs.LayerManager):
+    class LayerManager(runtime.Value):
         @staticmethod
         def getLayerFromName(*args, **kwargs): ...
         ...
@@ -1998,6 +2032,14 @@ class runtime:
                      row4:runtime.Point3,
                      ) -> None: ...
         ...
+        @overload
+        def __init__(self,
+                     row1:list[float|int],
+                     row2:list[float|int],
+                     row3:list[float|int],
+                     row4:list[float|int],
+                     ) -> None: ...
+        ...
         def __mul__(self, other: runtime.Matrix3) -> runtime.Matrix3: ...
         def __rmul__(self, other: runtime.Matrix3) -> runtime.Matrix3: ...
 
@@ -2096,7 +2138,7 @@ class runtime:
     @staticmethod
     def addModifier(*args, **kwargs) -> None: ...
     @staticmethod
-    def getSubAnim(*args, **kwargs) -> None: ...
+    def getSubAnim(*args, **kwargs) -> Any: ...
     @staticmethod
     def select(*args, **kwargs) -> None: ...
     @staticmethod
@@ -2210,4 +2252,44 @@ class runtime:
 
         :param doDisabled: true이면 비활성화된 뷰포트도 다시 그려집니다.
         """
+        ...
+    @staticmethod
+    def selectmore(nodes: Any) -> None:...
+    @staticmethod
+    def selectMore(nodes: Any) -> None:...
+    @staticmethod
+    def deselect(nodes: Any) -> None:...
+    @staticmethod
+    def getKey(*args: Any, **kwargs: Any) -> runtime.MAXKey:
+        """ [help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-3DEAA5D4-FEF9-40B8-99C0-C92A8769A117)"""
+        ...
+    @staticmethod
+    def addNewKey(*args: Any, **kwargs: Any) -> runtime.MAXKey:
+        """ [help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-3DEAA5D4-FEF9-40B8-99C0-C92A8769A117)"""
+    @staticmethod
+    def isProperty(obj:Any, prop: str) -> TypeGuard[bool]:
+        """[help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-879ECFAD-7928-44B3-BCD7-276D53C89B52#isproperty)
+        :param obj: object
+        :param prop: property name
+        :return: True if the object has the property, False otherwise
+        """
+        ...
+    @staticmethod
+    def ScaleMatrix(scale: runtime.Point3) -> runtime.Matrix3:
+        """[help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-D77C780A-4E8A-4528-949F-CC09AAE048DA)
+        :param scale: scaling factors for x, y, z axes
+        :return: scaling matrix
+        """
+        ...
+    @staticmethod
+    def save(arg1):...
+    @staticmethod
+    def getNumNamedSelSets() -> int:...
+    @staticmethod
+    def getNamedSelSetName(index: int) -> str:...
+    @staticmethod
+    def clearSelection() -> None:...
+    @staticmethod
+    def normTime(arg1: float) -> runtime.Time:
+        """animationRange의 범위를 1.0으로 정규화했을때 프레임값"""
         ...
