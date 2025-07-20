@@ -27,7 +27,6 @@ def animate(on_off: bool): ...
 @contextmanager
 def undo(on_off: bool, name): ...
 
-
 class _Stub이동속성():
     pos: runtime.Point3
     scale: runtime.Point3
@@ -36,6 +35,7 @@ class _Stub이동속성():
     scale: runtime.Point3
 
 class runtime:
+
     rootNode: runtime.MAXRootNode
     objects: runtime.ObjectSet
     selection: runtime.ObjectSet
@@ -1176,7 +1176,42 @@ class runtime:
         generateGlobalIllume: bool
         rcvGlobalIllum: bool
         ...
-    class camera(node, _Stub이동속성):...
+    class camera(node, _Stub이동속성):
+        fov: float
+        """ default: 45.0 """
+        curFOV: float
+        """ default: 45.0 """
+        fovType: Literal[1,2,3]
+        """ 1: horizontal, 2: vertical, 3: diagonal
+        default: 1 """
+        orthoProjection: bool
+        """ default: False """
+        type: runtime.Name
+        """ literal["free", "target"]
+        default: runtime.Name("free")
+        """
+        showCone: bool
+        """ default: True """
+        showHorizeon: bool
+        """ default: True """
+        nearrange: float
+        """ default: 0.0 """
+        farrange: float
+        """ default: 1000.0 """
+        clipManually: bool
+        """ default: False """
+        nearClip: float
+        """ default: 1.0 """
+        farclip: float
+        """ default: 1000.0 """
+        showRanges: bool
+        """ default: false """
+        targetDistance: float
+        """ default: 16.0 """
+        mpassEnable: bool
+        """ default: False """
+        mpassRenderPerPass: bool
+        """ default: False """
     class Freecamera(camera): ...
     class floatController(MAXWrapper):...
     class Editable_mesh(GeometryClass):...
