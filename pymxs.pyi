@@ -1229,7 +1229,14 @@ class runtime:
         @staticmethod
         def getIKActive(*args, **kwargs): ...
         @staticmethod
-        def setCopyName(*args, **kwargs): ...
+        def setCopyName(biped_ctrl, name: runtime.Name, int_which:int, String_newName:str):
+            """
+            :param biped_ctrl: Biped 컨트롤러
+            :param name: Literal["posture", "pose", "track"]
+            :param int_which: ?부터 시작하는 인덱스
+            :param String_newName: 새 이름
+            """
+            ...
         @staticmethod
         def getClipAtTime(*args, **kwargs): ...
         @staticmethod
@@ -1359,7 +1366,12 @@ class runtime:
         @staticmethod
         def setPlantedKey(*args, **kwargs): ...
         @staticmethod
-        def numCopyCollections(*args, **kwargs): ...
+        def numCopyCollections(biped_ctrl) -> int:
+            """
+            :param biped_ctrl: Biped 컨트롤러
+            :return: 컬렉션의 수,  없으면 0
+            """
+            ...
         @staticmethod
         def createScaleSubAnims(*args, **kwargs): ...
         @staticmethod
@@ -1397,7 +1409,13 @@ class runtime:
         @staticmethod
         def setSlidingKey(*args, **kwargs): ...
         @staticmethod
-        def getCopyCollection(*args, **kwargs): ...
+        def getCopyCollection(ctrl, index):
+            """
+            :param ctrl: Biped 컨트롤러
+            :param index: 1부터 시작하는 인덱스
+            :return: CopyCollection 객체 없으면 False
+            """
+            ...
         @staticmethod
         def setPosSubAnim(*args, **kwargs): ...
         @staticmethod
