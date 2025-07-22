@@ -59,6 +59,11 @@ class runtime:
             """
             ...
         ...
+    class MAXWrapperNonRefTarg(Value): ...
+    class ExporterPlugin(Value): ...
+    class FBXEXP(Value):
+        """ fbx 익스포트 플러그인 """
+        ...
     class BitMap(Value):
         filename: str
     class MAXKey(Value):
@@ -2345,4 +2350,19 @@ class runtime:
     @staticmethod
     def normTime(arg1: float) -> runtime.Time:
         """animationRange의 범위를 1.0으로 정규화했을때 프레임값"""
+        ...
+    @staticmethod
+    def exportFile(
+        fileName: str,
+        prompt: runtime.Name = runtime.Name("Prompt"),
+        selected: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        """[help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-3DEAA5D4-FEF9-40B8-99C0-C92A8769A117)
+        :param fileName: 파일 이름
+        :param prompt: Literal["#Prompt", "#noPrompt"] - 사용자에게 파일 이름을 묻는지 여부
+        :type prompt: runtime.Name
+        :param selected: 선택된 객체만 내보낼지 여부
+        :param using: 익스포트 종류
+        """
         ...
