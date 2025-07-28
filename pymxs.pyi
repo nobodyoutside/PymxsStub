@@ -2395,3 +2395,17 @@ class runtime:
         :return: (Point3, Point3)
         """
         ...
+    @staticmethod
+    def fetchMaxFile(quiet: bool = False) -> None:
+        """[help](...)
+        holde로 임시저장된 Max 파일을 불러옵니다.
+
+        :param quiet: True이면 사용자에게 알리지 않습니다.
+        """
+        ...
+    @staticmethod
+    def holdMaxFile():
+        """[help](...)
+        현재 열려 있는 Max 파일을 임시로 저장합니다.
+        """
+        ...
