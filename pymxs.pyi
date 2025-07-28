@@ -66,6 +66,9 @@ class runtime:
     class FBXEXP(ExporterPlugin):
         """ fbx 익스포트 플러그인 """
         ...
+    class ImporterPlugin(Value): ...
+    class FBXIMP(ImporterPlugin):...
+    FbxImporter = FBXIMP
     class BitMap(Value):
         filename: str
     class MAXKey(Value):
@@ -131,6 +134,9 @@ class runtime:
     class interface(Value):
         ...
 
+    class pluginManager(interface):
+        @staticmethod
+        def loadClass(type[MAXWrapperNonRefTarg]) -> bool: ...
     class skinUtils(interface):
         @staticmethod
         def ExtractSkinData(node) -> None: ...
@@ -558,6 +564,61 @@ class runtime:
         '''
         ...
     class Interface(runtime.Value): ...
+    class NamedSelectionSetManager(runtime.Interface):
+        @staticmethod
+        def AddNewNamedSelSet(nodes: Iterable[runtime.node], name: str) -> None:
+            """
+            새로운 이름이 지정된 선택 집합을 추가합니다.
+            :param nodes: 노드들의 iterable
+            :param name: 선택 집합의 이름
+            """
+            ...
+        @staticmethod
+        def RemoveNamedSelSet(name: str) -> None:
+            """ 이름이 지정된 선택 집합을 제거합니다. """
+            ...
+        @staticmethod
+        def GetNamedSelSetNames() -> List[str]:
+            """ 현재 존재하는 이름이 지정된 선택 집합의 이름들을 반환합니다. """
+            ...
+        @staticmethod
+        def GetNumNamedSelSets() -> int:
+            """ 현재 존재하는 이름이 지정된 선택 집합의 개수를 반환합니다. """
+            ...
+        @staticmethod
+        def GetNamedSelSetName(index: int) -> str:
+            """
+            주어진 인덱스에 해당하는 이름이 지정된 선택 집합의 이름을 반환합니다.
+            :param index: 선택 집합의 인덱스 (0부터 시작)
+            :return: 선택 집합의 이름
+            """
+            ...
+        @staticmethod
+        def GetNamedSelSetItem(set_index: int, item_index: int) -> runtime.node:
+            """
+            주어진 선택 집합 인덱스와 아이템 인덱스에 해당하는 노드를 반환합니다.
+            :param set_index: 선택 집합의 인덱스 (0부터 시작)
+            :param item_index: 아이템의 인덱스 (0부터 시작)
+            :return: 선택 집합에서 해당 아이템의 노드
+            """
+            ...
+        @staticmethod
+        def RemoveNamedSelSetByIndex(set_index: int) -> bool:
+            """
+            주어진 인덱스에 해당하는 이름이 지정된 선택 집합을 제거합니다.
+            :param set_index: 선택 집합의 인덱스 (0부터 시작)
+            :return: 제거 성공 여부
+            """
+            ...
+        @staticmethod
+        def RemoveNamedSelSetByName(set_name: str) -> bool:
+            """
+            주어진 이름에 해당하는 이름이 지정된 선택 집합을 제거합니다.
+            RemoveNamedSelSetByName - no automatic redraw after invoked
+            :param set_name: 선택 집합의 이름
+            :return: 제거 성공 여부
+            """
+            ...
     class LayerProperties(Interface):
         # --- Properties ---
         on: bool
@@ -2437,5 +2498,16 @@ class runtime:
         """[help](...)
         :param fileName: 파일 이름
         파일을 삭제합니다.
+        """
+        ...
+    @staticmethod
+    def FBXImporterSetParam(
+        param: str,
+        value: str | int | float | bool | None = None,
+    ) -> None:
+        """[help]()
+        fbx임포트 설정
+        :param param: 파라미터 이름
+        :param value: 파라미터 값
         """
         ...
