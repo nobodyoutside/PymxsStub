@@ -2432,3 +2432,10 @@ class runtime:
         범위의 키들을 삭제합니다.
         """
         ...
+    @staticmethod
+    def deleteFile(fileName: str) -> None:
+        """[help](...)
+        :param fileName: 파일 이름
+        파일을 삭제합니다.
+        """
+        ...
