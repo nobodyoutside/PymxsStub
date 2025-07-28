@@ -2409,3 +2409,26 @@ class runtime:
         현재 열려 있는 Max 파일을 임시로 저장합니다.
         """
         ...
+    @staticmethod
+    def selectKeys(ctrl: runtime.controller) -> None:
+        """[help](...)
+        :param ctrl: 컨트롤러
+        컨트롤러의 키들을 선택합니다.
+        """
+        ...
+    @staticmethod
+    def deselectKeys(ctrl: runtime.controller, range: runtime.Interval) -> None:
+        """[help](...)
+        :param ctrl: 컨트롤러
+        :param range: 범위
+        범위의 키들을 선택에서 제외합니다.
+        """
+        ...
+    @staticmethod
+    def deleteKeys(ctrl: runtime.controller, target: runtime.Name) -> None:
+        """[help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-B1700B1D-B1EA-4A6C-B4A3-A29DB26C8C02)
+        :param ctrl: 컨트롤러
+        :param target: 키 타입 Literal[#allKeys | #selection]
+        범위의 키들을 삭제합니다.
+        """
+        ...
