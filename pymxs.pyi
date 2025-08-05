@@ -911,7 +911,14 @@ class runtime:
     @staticmethod
     def messageBox(*args, **kwargs) -> Any: ...
     @staticmethod
-    def attachObjects(*args, **kwargs) -> Any: ...
+    def attachObjects(node1, node2, move:bool=True) -> None:
+        """링크 걸기
+
+        :param node1:부모가 될 노드
+        :param node2:부모가 될 노드의 자식이 될 노드
+        :param move: True이면 node2가 node1의 위치로 이동됩니다.
+        """
+        ...
     @staticmethod
     def quat(*args, **kwargs) -> Any: ...
     @staticmethod
