@@ -514,6 +514,25 @@ class runtime:
     class refs(StructDef):
         @staticmethod
         def dependentNodes(*args, **kwargs) -> list: ...
+        
+        @staticmethod
+        def replaceReference(object, index: int, newTarget) -> None:
+            """ 오브젝트의 index번째 레퍼런스를 newTarget으로 교체합니다.
+            타입체크를 해주지는 않으니 검증후 적용이 필요함.
+
+            :param object: 레퍼런스를 교체할 오브젝트
+            :param index: 교체할 레퍼런스의 인덱스 (1부터 시작)
+            :param newTarget: 새로 설정할 레퍼런스 대상
+            
+            예)
+            오브젝티의 인덱스1은 트렌스폼 컨트롤러. 이걸 다른 컨트롤러로 교체.
+            rt.refs.replaceReference(obj, 1, new_controller)
+
+            트렌스폼의 하위 컨트롤러 교체도 가능
+            rt.refs.replaceReference(obj.transform, 2, rt.euler_XYZ())
+            """
+            ...
+
 
     class skinOps(StructDef):
         '''
@@ -603,6 +622,7 @@ class runtime:
         '''
         ...
     class Interface(runtime.Value): ...
+    
     class renderMessageManager(runtime.Interface):
         """ """
         ShowInfoMessage: bool = ...
@@ -1122,6 +1142,10 @@ class runtime:
     class Position_XYZ(MAXWrapper): ...
     class Matrix3Controller(MAXWrapper, _Stub이동속성): ...
     class prs(Matrix3Controller): ...
+    class transform_list(Matrix3Controller, runtime.list):
+        list: runtime.list
+        """ list 인터페이스 """
+        ...
     class Link_Constraint(runtime.constraints, Matrix3Controller):
         def addTarget(self, target:runtime.node, frameNo:int) -> bool: ...
     class transform_script(Matrix3Controller):
