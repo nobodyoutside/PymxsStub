@@ -1297,8 +1297,15 @@ class runtime:
     def GetNamedSelSetItemCount(i: int) -> int:
         """ 명명된 선택 세트의 항목 수를 반환합니다. """
         ...
+    
+    @overload
     @staticmethod
-    def getNodeByName(name: str, all=False) -> runtime.node | None: ...
+    def getNodeByName(name: str) -> runtime.node | None : ...
+
+    @overload
+    @staticmethod
+    def getNodeByName(name: str, all: Literal[True]) ->  runtime.Array[runtime.node] : ...
+
     @staticmethod
     def setUserPropVal (
         arg1, arg2:str, arg3:str|int|bool,
@@ -1693,6 +1700,7 @@ class runtime:
         """ default: False """
     class Freecamera(camera): ...
     class floatController(MAXWrapper):
+        value: float
         keys: runtime.Array[runtime.MAXKey]
         def __init__(self) -> None: ...
         ...
