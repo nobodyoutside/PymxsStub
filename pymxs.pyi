@@ -622,7 +622,255 @@ class runtime:
         '''
         ...
     class Interface(runtime.Value): ...
-    
+    class IScriptCtrl(runtime.Interface):
+        """Script Controller Interface
+        스크립트 컨트롤러의 인터페이스를 제공합니다.
+        """
+        
+        # Properties
+        ThrowOnError: bool
+        """스크립트 오류 발생 시 예외를 던질지 여부를 설정합니다."""
+        
+        # Methods
+        def SetExpression(self, expression: str) -> bool:
+            """스크립트 표현식을 설정합니다.
+            
+            :param expression: 설정할 스크립트 표현식
+            :return: 설정 성공 여부
+            """
+            ...
+        
+        def GetExpression(self) -> str:
+            """현재 스크립트 표현식을 반환합니다.
+            
+            :return: 현재 설정된 스크립트 표현식
+            """
+            ...
+        
+        def GetDescription(self) -> str:
+            """스크립트 컨트롤러의 설명을 반환합니다.
+            
+            :return: 컨트롤러 설명
+            """
+            ...
+        
+        def SetDescription(self, description: str) -> bool:
+            """스크립트 컨트롤러의 설명을 설정합니다.
+            
+            :param description: 설정할 설명
+            :return: 설정 성공 여부
+            """
+            ...
+        
+        def NumVariables(self) -> int:
+            """스크립트에서 사용되는 변수의 개수를 반환합니다.
+            
+            :return: 변수 개수
+            """
+            ...
+        
+        def AddConstant(self, name: str, constant: Any) -> bool:
+            """상수 변수를 추가합니다.
+            
+            :param name: 변수 이름
+            :param constant: 상수 값
+            :return: 추가 성공 여부
+            """
+            ...
+        
+        def AddTarget(self, name: str, target: Any, offset: runtime.Time = runtime.Time(0), owner: Any = None) -> bool:
+            """타겟 변수를 추가합니다.
+            
+            :param name: 변수 이름
+            :param target: 타겟 값
+            :param offset: 시간 오프셋 (기본값: 0f)
+            :param owner: 소유자 (기본값: undefined)
+            :return: 추가 성공 여부
+            """
+            ...
+        
+        def AddObject(self, name: str, obj: Any) -> bool:
+            """오브젝트 변수를 추가합니다.
+            
+            :param name: 변수 이름
+            :param obj: 오브젝트 값
+            :return: 추가 성공 여부
+            """
+            ...
+        
+        def AddNode(self, name: str, node: runtime.node) -> bool:
+            """노드 변수를 추가합니다.
+            
+            :param name: 변수 이름
+            :param node: 노드
+            :return: 추가 성공 여부
+            """
+            ...
+        
+        def SetConstant(self, which: Union[str, int], constant: Any) -> bool:
+            """상수 변수의 값을 설정합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :param constant: 새로운 상수 값
+            :return: 설정 성공 여부
+            """
+            ...
+        
+        def SetTarget(self, which: Union[str, int], target: Any, owner: Any = None) -> bool:
+            """타겟 변수의 값을 설정합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :param target: 새로운 타겟 값
+            :param owner: 소유자 (기본값: undefined)
+            :return: 설정 성공 여부
+            """
+            ...
+        
+        def SetObject(self, which: Union[str, int], obj: Any) -> bool:
+            """오브젝트 변수의 값을 설정합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :param obj: 새로운 오브젝트 값
+            :return: 설정 성공 여부
+            """
+            ...
+        
+        def SetNode(self, which: Union[str, int], node: runtime.node) -> bool:
+            """노드 변수의 값을 설정합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :param node: 새로운 노드
+            :return: 설정 성공 여부
+            """
+            ...
+        
+        def DeleteVariable(self, which: Union[str, int]) -> bool:
+            """변수를 삭제합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :return: 삭제 성공 여부
+            """
+            ...
+        
+        def RenameVariable(self, which: Union[str, int], name: str) -> bool:
+            """변수의 이름을 변경합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :param name: 새로운 변수 이름
+            :return: 이름 변경 성공 여부
+            """
+            ...
+        
+        def GetOffset(self, which: Union[str, int]) -> runtime.Time:
+            """변수의 시간 오프셋을 반환합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :return: 시간 오프셋
+            """
+            ...
+        
+        def SetOffset(self, which: Union[str, int], offset: runtime.Time) -> bool:
+            """변수의 시간 오프셋을 설정합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :param offset: 새로운 시간 오프셋
+            :return: 설정 성공 여부
+            """
+            ...
+        
+        def VariableExists(self, name: str) -> bool:
+            """지정된 이름의 변수가 존재하는지 확인합니다.
+            
+            :param name: 확인할 변수 이름
+            :return: 변수 존재 여부
+            """
+            ...
+        
+        def GetConstant(self, which: Union[str, int]) -> Any:
+            """상수 변수의 값을 반환합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :return: 상수 값
+            """
+            ...
+        
+        def GetTarget(self, which: Union[str, int], asObject: bool = False) -> Any:
+            """타겟 변수의 값을 반환합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :param asObject: 오브젝트로 반환할지 여부 (기본값: False)
+            :return: 타겟 값
+            """
+            ...
+        
+        def GetObject(self, which: Union[str, int]) -> runtime.MaxObject:
+            """오브젝트 변수의 값을 반환합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :return: 오브젝트 값
+            """
+            ...
+        
+        def GetNode(self, which: Union[str, int]) -> runtime.node:
+            """노드 변수의 값을 반환합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :return: 노드
+            """
+            ...
+        
+        def GetValue(self, which: Union[str, int], asObject: bool = False) -> Any:
+            """변수의 값을 반환합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :param asObject: 오브젝트로 반환할지 여부 (기본값: False)
+            :return: 변수 값
+            """
+            ...
+        
+        def GetVarValue(self, which: Union[str, int]) -> Any:
+            """변수의 값을 반환합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :return: 변수 값
+            """
+            ...
+        
+        def GetType(self, which: Union[str, int]) -> Literal['unknown', 'target', 'constant', 'object', 'node']:
+            """변수의 타입을 반환합니다.
+            
+            :param which: 변수 식별자 (이름 또는 인덱스)
+            :return: 변수 타입 (#unknown|#target|#constant|#object|#node)
+            """
+            ...
+        
+        def GetName(self, index: int) -> str:
+            """지정된 인덱스의 변수 이름을 반환합니다.
+            
+            :param index: 변수 인덱스
+            :return: 변수 이름
+            """
+            ...
+        
+        def GetIndex(self, name: str) -> int:
+            """지정된 이름의 변수 인덱스를 반환합니다.
+            
+            :param name: 변수 이름
+            :return: 변수 인덱스
+            """
+            ...
+        
+        def Update(self) -> None:
+            """스크립트 컨트롤러를 업데이트합니다."""
+            ...
+        
+        def PrintDetails(self) -> str:
+            """스크립트 컨트롤러의 상세 정보를 문자열로 반환합니다.
+            
+            :return: 상세 정보 문자열
+            """
+            ...
+       
     class renderMessageManager(runtime.Interface):
         """ """
         ShowInfoMessage: bool = ...
@@ -1444,7 +1692,17 @@ class runtime:
         mpassRenderPerPass: bool
         """ default: False """
     class Freecamera(camera): ...
-    class floatController(MAXWrapper):...
+    class floatController(MAXWrapper):
+        keys: runtime.Array[runtime.MAXKey]
+        def __init__(self) -> None: ...
+        ...
+    class float_script(floatController, IScriptCtrl):
+        IScriptCtrl: runtime.IScriptCtrl
+        ...
+    class Linear_Float(floatController): ...
+    class bezier_float(floatController):
+        def __init__(self) -> None: ...
+        ...
     class Editable_mesh(GeometryClass):...
     class BoneGeometry(GeometryClass):
         sidefins: bool
@@ -2285,6 +2543,7 @@ class runtime:
                        endPos: runtime.Point3,
                        zAxis: runtime.Point3) -> runtime.BoneGeometry: ...
     class controller: ...
+    
     class Quat: ...
 
     class Matrix3(Value):
@@ -2685,5 +2944,17 @@ class runtime:
     def formattedPrint(*args, **kwargs):
         """ 포맷된 출력
         https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-19874C74-DEE5-4BCD-A5FD-4F0F51EB3451
+        """
+        ...
+    @staticmethod
+    def unRegisterTimeCallback(fn):
+        """시간 콜백 등록 해제
+        :param fn: 콜백 함수
+        """
+        ...
+    @staticmethod
+    def registerTimeCallback(fn):
+        """시간 콜백 등록
+        :param fn: 콜백 함수
         """
         ...
