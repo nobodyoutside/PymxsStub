@@ -76,6 +76,7 @@ class runtime:
     class BitMap(Value):
         filename: str
     class MAXKey(Value):
+        time: runtime.Time
         # tension: Any
         # continuity: Any
         # bias: Any
