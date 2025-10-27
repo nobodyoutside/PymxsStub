@@ -77,9 +77,26 @@ class runtime:
         filename: str
     class MAXKey(Value):
         time: runtime.Time
-        # tension: Any
-        # continuity: Any
-        # bias: Any
+
+        # for Bezier Float Key
+        inTangent : runtime.Point3 | float
+        outTangent : runtime.Point3 | float
+        inTangentLength : float
+        outTangentLength : float
+        inTangentType : runtime.Name
+        """
+        #smooth #linear #step #fast #slow #custom #auto
+        """
+        outTangentType : runtime.Name
+        """
+        #smooth #linear #step #fast #slow #custom #auto
+        """
+        freeHandle : bool
+        x_locked = True
+        y_locked = True
+        z_locked = True
+        constantVelocity = True
+        ## 
         ...
     class SelectionSetArray(Value):
         @overload
@@ -2826,7 +2843,7 @@ class runtime:
     def addNewKey(*args: Any, **kwargs: Any) -> runtime.MAXKey:
         """ [help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-3DEAA5D4-FEF9-40B8-99C0-C92A8769A117)"""
     @staticmethod
-    def isProperty(obj:Any, prop: str) -> TypeGuard[bool]:
+    def isProperty(obj: runtime.MaxObject, prop: str) -> bool:
         """[help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-879ECFAD-7928-44B3-BCD7-276D53C89B52#isproperty)
         :param obj: object
         :param prop: property name
@@ -2965,5 +2982,13 @@ class runtime:
     def registerTimeCallback(fn):
         """시간 콜백 등록
         :param fn: 콜백 함수
+        """
+        ...
+    @staticmethod
+    def mapKeys(max_object, fn, options: runtime.Name = ...):
+        """시간 콜백 등록
+        
+        :param fn: 콜백 함수
+        :param options: [#allKeys] [#selection] [#slide] [#rightToLeft]
         """
         ...
