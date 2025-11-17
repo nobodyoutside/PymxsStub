@@ -23,6 +23,10 @@ ClassInfo: TypeAlias = Union[Type[T] , Tuple['ClassInfo[T]', ...]]
 _Modifier = TypeVar('_Modifier', bound=runtime.modifier)
 
 
+def byref(arg: Any) -> Any:
+    """ 레퍼런스 전달용 맥스 스크립트 변수 래퍼 생성 """
+    ...
+
 def attime(time: float):...
   
 def animate(on_off: bool): ...
@@ -156,6 +160,20 @@ class runtime:
     class interface(Value):
         ...
 
+    class IKSys(interface):
+        @staticmethod
+        def ikChain(
+            start_joint: runtime.node,
+            end_joint: runtime.node,
+            solver: str
+        ) -> Any:
+            """ IK 체인을 생성합니다.
+            :param start_joint: IK 체인의 시작 조인트
+            :param end_joint: IK 체인의 엔드 조인트
+            :param solver: IK 체인 솔버이름 (literal["IKLimb", "IKHISolver", "SplineIKSolver"])
+            :return: 생성된 IK 핸들
+            """
+            ...
     class SkinUtils(interface):
         """ 스킨 유틸리티 클래스
         [helper]<https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-226B4FEA-9707-4582-A7FE-34BF142F345F>
@@ -216,6 +234,17 @@ class runtime:
             number: int,
             noWarning: bool
         ) -> runtime.node: ...
+
+        @staticmethod
+        def CloneNodes(
+            nodes: runtime.Array[runtime.node] | list,
+            offset: runtime.Point3,
+            expandHierarchy: bool,
+            cloneType: runtime.Name,
+            newNodes: Any,
+            actualNodeList: Any
+        ) -> Tuple[int, runtime.Array[runtime.node], runtime.Array[runtime.node]]:
+            ...
 
     class OkClass(Value):
         ...
@@ -1346,11 +1375,15 @@ class runtime:
     @staticmethod
     def loadMaxFile(*args, **kwargs) -> None: ...
     @staticmethod
-    def mergeMAXFile(*args, **kwargs) -> None: ...
+    def mergeMAXFile(*args, **kwargs) -> bool|tuple: ...
     @staticmethod
-    def saveMaxFile(*args, **kwargs) -> None: ...
+    def saveMaxFile(file_name: str, saveAsVersion=2024, clearNeedSaveFlag=False,
+                    useNewFile=False, quiet=False) -> None: ...
     @staticmethod
     def getFiles(*args, **kwargs) -> list: ...
+    @staticmethod
+    def getSavePath(*args, **kwargs) -> str: ...
+    
     @staticmethod
     def getFilenameType(*args, **kwargs) -> str: ...
     @staticmethod
