@@ -23,6 +23,10 @@ ClassInfo: TypeAlias = Union[Type[T] , Tuple['ClassInfo[T]', ...]]
 _Modifier = TypeVar('_Modifier', bound=runtime.modifier)
 
 
+def byref(arg: Any) -> Any:
+    """ 레퍼런스 전달용 맥스 스크립트 변수 래퍼 생성 """
+    ...
+
 def attime(time: float):...
   
 def animate(on_off: bool): ...
@@ -151,12 +155,31 @@ class runtime:
 
 
     class BitArray(Value):
+        count: int
         def __iter__(self) -> runtime.BitArray: ...
         def __next__(self) -> int: ...
+        def __add__(self, other: runtime.BitArray) -> runtime.BitArray: ...
+        def __sub__(self, other: runtime.BitArray) -> runtime.BitArray: ...
+        def __mul__(self, other: runtime.BitArray) -> runtime.BitArray: ...
+        def isEmpty(self) -> bool: ...
 
     class interface(Value):
         ...
 
+    class IKSys(interface):
+        @staticmethod
+        def ikChain(
+            start_joint: runtime.node,
+            end_joint: runtime.node,
+            solver: str
+        ) -> Any:
+            """ IK 체인을 생성합니다.
+            :param start_joint: IK 체인의 시작 조인트
+            :param end_joint: IK 체인의 엔드 조인트
+            :param solver: IK 체인 솔버이름 (literal["IKLimb", "IKHISolver", "SplineIKSolver"])
+            :return: 생성된 IK 핸들
+            """
+            ...
     class SkinUtils(interface):
         """ 스킨 유틸리티 클래스
         [helper]<https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-226B4FEA-9707-4582-A7FE-34BF142F345F>
@@ -217,6 +240,17 @@ class runtime:
             number: int,
             noWarning: bool
         ) -> runtime.node: ...
+
+        @staticmethod
+        def CloneNodes(
+            nodes: runtime.Array[runtime.node] | list,
+            offset: runtime.Point3,
+            expandHierarchy: bool,
+            cloneType: runtime.Name,
+            newNodes: Any,
+            actualNodeList: Any
+        ) -> Tuple[int, runtime.Array[runtime.node], runtime.Array[runtime.node]]:
+            ...
 
     class OkClass(Value):
         ...
@@ -626,6 +660,21 @@ class runtime:
             - `skinOps.removebone <Skin> <BoneID_integer> [(node:<node> | name:<string>)]`
             '''
             ...
+        @staticmethod
+        def GetSelectedVertices(skin: runtime.modifier) -> runtime.BitArray: ...
+        @staticmethod
+        def GetNumberVertices(*args, **kwargs): ...
+        @staticmethod
+        def IsVertexSelected(*args, **kwargs): ...
+        @staticmethod
+        def getSelectedVertices(*args, **kwargs): ...
+        @staticmethod
+        def SelectVertices(*args, **kwargs): ...
+        @staticmethod
+        def GetSelectedBone(*args, **kwargs) -> int: ...
+        @staticmethod
+        def SelectBone(Skin, bone_integer, node=..., name=...) -> int: ...
+
     class windows:
         @staticmethod
         def getMAXHWND() -> int: ...
@@ -1180,17 +1229,25 @@ class runtime:
     class list(MixinInterface):
         """ https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=Max_Developer_Help_cpp_ref_class_i_list_control_html"""
         count: int
-        def getCount(self) -> int: ...
-        def setActive(self, arg1: int) -> None:
+        @staticmethod
+        def getCount() -> int: ...
+        @staticmethod
+        def setActive(arg1: int) -> None:
             """:param arg1: 1부터 시작, 활성화할 대상""";...
-        def getActive(self) -> int:
+        @staticmethod
+        def getActive() -> int:
             """:retrun: 활성화 인덱스 1 부터""";...
-        def delete(self, arg1: int) -> None:
+        @staticmethod
+        def delete(arg1: int) -> None:
             """:param arg1: 1부터 시작, 삭제할 대상""";...
-        def cut(self, arg1: int) -> None:...
-        def paste(self, arg1: int) -> None:...
-        def getName(self, arg1: int) -> str:...
-        def setName(self, arg1: int, arg2:str) -> None:
+        @staticmethod
+        def cut(arg1: int) -> None:...
+        @staticmethod
+        def paste(arg1: int) -> None:...
+        @staticmethod
+        def getName(arg1: int) -> str:...
+        @staticmethod
+        def setName(arg1: int, arg2:str) -> None:
             """
             :param arg1: <index>listIndex: 항목의 인덱스입니다.
             :param arg2:  <string>name: 설정할 이름입니다.""";...
@@ -1258,8 +1315,11 @@ class runtime:
     @staticmethod
     def delete(*args, **kwargs) -> Any: ...
     @staticmethod
-    def isKindOf(arg1: Any, arg2:ClassInfo[_T]) -> TypeGuard[_T]:
-        return isinstance(arg1, arg2)
+    def isKindOf(arg1: Any, arg2:Type[_T]) -> TypeGuard[_T]:
+        ...
+    # @staticmethod
+    # def isKindOf(arg1: Any, arg2:ClassInfo[_T]) -> TypeGuard[_T]:
+    #     return isinstance(arg1, arg2)
     @staticmethod
     def messageBox(*args, **kwargs) -> Any: ...
     @staticmethod
@@ -1347,11 +1407,15 @@ class runtime:
     @staticmethod
     def loadMaxFile(*args, **kwargs) -> None: ...
     @staticmethod
-    def mergeMAXFile(*args, **kwargs) -> None: ...
+    def mergeMAXFile(*args, **kwargs) -> bool|tuple: ...
     @staticmethod
-    def saveMaxFile(*args, **kwargs) -> None: ...
+    def saveMaxFile(file_name: str, saveAsVersion=2024, clearNeedSaveFlag=False,
+                    useNewFile=False, quiet=False) -> None: ...
     @staticmethod
     def getFiles(*args, **kwargs) -> list: ...
+    @staticmethod
+    def getSavePath(*args, **kwargs) -> str: ...
+    
     @staticmethod
     def getFilenameType(*args, **kwargs) -> str: ...
     @staticmethod
@@ -1532,6 +1596,11 @@ class runtime:
         color_plus_illum: Type[runtime.Name]
         ...
     class NodeGeneric(Value): ...
+    class TrackViewPick(Value):
+        name : str
+        anim : Any  # cpp의 Animatable 타입을 반환(컨트롤러 같은..)
+        client : runtime.MAXWrapper
+        subNum : int
     class setFaceSelection(NodeGeneric):
         def __new__(cls, *args, **kwargs) -> None: ...
     class getFaceSelection(NodeGeneric):
@@ -1581,6 +1650,7 @@ class runtime:
         """[Node : MAXWrapper](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-1C9953AA-4750-4147-91DC-127AF2F7BC87)
         [Interface : INode](https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=GUID-0BFEF796-5952-48B0-8929-88475F927649)
         """
+        pos: ...
         position: ...
         rotation: ...
         scale: ...
@@ -2103,18 +2173,18 @@ class runtime:
     class Material: ...
     class setPropertyController(Primitive):
         def __new__(cls, contrller, target_name:str, new_controller) -> None: ...
-    class SetCommandPanelTaskMode(Primitive):
-        def __new__(cls, name: runtime.Name) -> None:
-            """ name
-            - create
-            - modify
-            - hierarchy 
-            - motion 
-            - display 
-            - utility 
-            """
-            ...
-        ...
+    # class SetCommandPanelTaskMode(Primitive):
+    #     def __new__(cls, name: runtime.Name) -> None:
+    #         """ name
+    #         - create
+    #         - modify
+    #         - hierarchy 
+    #         - motion 
+    #         - display 
+    #         - utility 
+    #         """
+    #         ...
+    #     ...
     # class GetDir(Primitive):
     #     """
     #     :arg name:
@@ -2137,13 +2207,17 @@ class runtime:
 
         [2022 api link](https://help.autodesk.com/view/MAXDEV/2022/ENU/?guid=GUID-1564BD35-50EA-4140-9150-1AECC89F713C)
         """
-        x: int
-        y: int
-        z: int
+        x: int|float
+        y: int|float
+        z: int|float
         def __init__(self, *args, **kwargs) -> None: ...
         ...
         def __add__(self, other): ...
         def __mul__(self, other): ...
+        def __iter__(self):
+            yield self.x
+            yield self.y
+            yield self.z
 
     class Color(runtime.Value):
         def __init__(self, *args, **kwargs) -> None: ...
@@ -2228,6 +2302,21 @@ class runtime:
         def getFaceCenter(*args, **kwargs) -> runtime.Point3:
             """<point3>meshop.getFaceCenter <Mesh mesh> <int faceIndex> node:<node=unsupplied>"""
             ...
+        @staticmethod
+        def getVertSelection(*args, **kwargs):...
+        @staticmethod
+        def getHiddenVerts(*args, **kwargs):...
+        @staticmethod
+        def getVertsByColor(*args, **kwargs):...
+        @staticmethod
+        def getFacesUsingVert(*args, **kwargs):...
+        @staticmethod
+        def getHiddenFaces(*args, **kwargs):...
+        @staticmethod
+        def setHiddenFaces(*args, **kwargs):...
+        @staticmethod
+        def setHiddenVerts(*args, **kwargs):...
+
     class getNumFaces(Generic):
         def __new__(cls, node) -> int: ...
     class polyop(StructDef):
@@ -2796,7 +2885,11 @@ class runtime:
     @staticmethod
     def DisableSceneRedraw() -> None:...
     @staticmethod
+    def disableSceneRedraw() -> None:...
+    @staticmethod
     def EnableSceneRedraw() -> None:...
+    @staticmethod
+    def enableSceneRedraw() -> None:...
     @staticmethod
     def substituteString(arg1: str, arg2:str, arg3:str) -> str:
         """[help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-A6A60FC7-6206-4FFC-80E2-0EF8544BE2C4)
@@ -2993,3 +3086,42 @@ class runtime:
         :param options: [#allKeys] [#selection] [#slide] [#rightToLeft]
         """
         ...
+    
+    @staticmethod
+    def join(array1: _T, array2: _T) -> _T:
+        """두  배열을 결합하여 새  배열을 만듭니다.
+        :param array1: 첫 번째  배열
+        :param array2: 두 번째  배열
+        :return: 결합된  배열
+        """
+        ...
+    
+    @staticmethod
+    def maxVersion() -> list[int | str]:
+        """3ds Max 버전 정보를 반환합니다.
+        
+        :return: [릴리스 번호, API버전, SDK 개정판, 주요 버전, 업데이트 버전, 핫픽스 번호, 빌드 번호, 연도, 버전 설명]
+        <Array<#(26000, 64, 0, 26, 2, 9, 20088, 2024, ".2.9 Security Fix")>>
+        :rtype: list[int | str]
+        """
+        ...
+    @staticmethod
+    def ResumeEditing(which: runtime.Name) -> None:
+        """ 명령 패널에서 원격 설치 표시를 일시 재개합니다 """
+        ...
+    @staticmethod
+    def SuspendEditing(which: runtime.Name) -> None:
+        """ 명령 패널에서 원격 설치 표시를 일시 중단합니다 """
+        ...
+    @staticmethod
+    def getVertSelection(*args, **kwargs): ...
+    @staticmethod
+    def setVertSelection(*args, **kwargs): ...
+    @staticmethod
+    def getvertcolor(*args, **kwargs): ...
+    @staticmethod
+    def getnumcpvverts(*args, **kwargs): ...
+    @staticmethod
+    def SetCommandPanelTaskMode(*args, **kwargs): ...
+    @staticmethod
+    def update(*args, **kwargs): ...
