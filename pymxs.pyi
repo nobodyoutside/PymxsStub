@@ -55,9 +55,15 @@ class runtime:
     maxFileName: str
     animationRange: runtime.Interval
     animateMode: bool
-    sliderTime: runtime.Time
+    # sliderTime: runtime.Time
     SelectionSets: runtime.SelectionSetArray
     selectionSets: runtime.SelectionSetArray
+
+    @property
+    def sliderTime(self) -> runtime.Time: ...
+
+    @sliderTime.setter
+    def sliderTime(self, value: runtime.Time | int) -> None: ...
 
     class Value:
         def __init__(self, *args, **kwargs) -> None: ...
@@ -76,6 +82,28 @@ class runtime:
         ...
     FbxExporter = FBXEXP
     class ImporterPlugin(Value): ...
+    class globalVars(Value):
+        @staticmethod
+        def get(name: runtime.Name) -> Any:
+            """ 글로벌 변수 값을 반환합니다.
+            :param name: 글로벌 변수 이름
+            :return: 글로벌 변수 값
+            """
+            ...
+        @staticmethod
+        def set(name: runtime.Name, value: Any) -> None:
+            """ 글로벌 변수 값을 설정합니다.
+            :param name: 글로벌 변수 이름
+            :param value: 설정할 값
+            """
+            ...
+        @staticmethod
+        def isglobal(name: runtime.Name) -> bool:
+            """ 글로벌 변수 존재 여부를 반환합니다.
+            :param name: 글로벌 변수 이름
+            :return: 존재 여부
+            """
+            ...
     class FBXIMP(ImporterPlugin):...
     FbxImporter = FBXIMP
     class BitMap(Value):
@@ -1384,6 +1412,29 @@ class runtime:
     @overload
     @staticmethod
     def getNodeByName(name: str, all: Literal[True]) ->  runtime.Array[runtime.node] : ...
+    @overload
+    @staticmethod
+    def getNodeByName(name: str, exact=False, ignoreCase=True, all=False) ->  runtime.Array[runtime.node] :
+        """
+        Sphere:B B @ [...]
+
+        getnodebyname "aa" exact:true
+        $Teapot:aa @ [...]
+        getnodebyname "aa" exact:false
+        $Teapot:aa @ [...]
+
+        getnodebyname "B B" exact:true
+        $Sphere:B B @ [...]
+        getnodebyname "B_B" exact:true
+        undefined
+        getnodebyname "BB" exact:true
+        undefined
+        getnodebyname "B_B" exact:false
+        $Sphere:B B @ [...]
+        getnodebyname "BB" exact:false
+        $Sphere:B B @ [...]
+        """
+        ...
 
     @staticmethod
     def setUserPropVal (
@@ -3000,6 +3051,7 @@ class runtime:
         현재 열려 있는 Max 파일을 임시로 저장합니다.
         """
         ...
+    @overload
     @staticmethod
     def selectKeys(ctrl: runtime.controller) -> None:
         """[help](...)
@@ -3007,6 +3059,32 @@ class runtime:
         컨트롤러의 키들을 선택합니다.
         """
         ...
+    @overload
+    @staticmethod
+    def selectKeys(ctrl: runtime.controller, range: runtime.Interval) -> None:
+        """[help](...)
+        :param ctrl: 컨트롤러
+        :param range: 범위
+        범위의 키들을 선택합니다.
+        """
+        ...
+    @overload
+    @staticmethod
+    def selectKeys(ctrl: runtime.controller, time: runtime.Time) -> None:
+        """[help](...)
+        :param ctrl: 컨트롤러
+        :param time: 시간
+        특정 시간의 키들을 선택합니다.
+        """
+        ...
+    @overload
+    @staticmethod
+    def deselectKeys(ctrl: runtime.controller) -> None:
+        """[help](...)
+        :param ctrl: 컨트롤러 키들을 선택에서 제외합니다.
+        """
+        ...
+    @overload
     @staticmethod
     def deselectKeys(ctrl: runtime.controller, range: runtime.Interval) -> None:
         """[help](...)
@@ -3015,6 +3093,14 @@ class runtime:
         범위의 키들을 선택에서 제외합니다.
         """
         ...
+    @overload
+    @staticmethod
+    def deleteKeys(ctrl: runtime.controller) -> None:
+        """[help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-B1700B1D-B1EA-4A6C-B4A3-A29DB26C8C02)
+        :param ctrl: 컨트롤러의 모든 키를 삭제함.
+        """
+        ...
+    @overload
     @staticmethod
     def deleteKeys(ctrl: runtime.controller, target: runtime.Name) -> None:
         """[help](https://help.autodesk.com/view/MAXDEV/2024/ENU/?guid=GUID-B1700B1D-B1EA-4A6C-B4A3-A29DB26C8C02)
@@ -3023,6 +3109,16 @@ class runtime:
         범위의 키들을 삭제합니다.
         """
         ...
+    
+    @overload
+    @staticmethod
+    def deleteKeys(ctrl: runtime.controller, index_1base: int) -> None:
+        ...
+
+    @staticmethod
+    def deleteKey(ctrl: runtime.controller, index_1base: int) -> None:
+        ...
+
     @staticmethod
     def deleteFile(fileName: str) -> None:
         """[help](...)
